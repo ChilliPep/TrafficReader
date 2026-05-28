@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  traffic-reader:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - GIS_API_KEY=${GIS_API_KEY}
+      - NODE_ENV=production
+    volumes:
+      - ./backend/exports:/app/backend/exports
+      - ./analysis/output:/app/analysis/output
+    restart: unless-stopped

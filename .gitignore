@@ -1,0 +1,6 @@
+backend/node_modules/
+backend/exports/
+backend/database.db
+analysis/output/
+.env
+*.log

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Traffic Reader | Kyzylorda</title>
+    <meta name="description" content="Real-time traffic analysis dashboard for Kyzylorda city.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <header class="glass-panel">
+            <div class="logo">
+                <div class="logo-icon"></div>
+                <h1>Traffic<span>Reader</span></h1>
+            </div>
+            <div class="status-indicator">
+                <span class="pulse"></span>
+                <span id="system-status">Live Monitoring</span>
+            </div>
+        </header>
+
+        <main class="dashboard-grid">
+            <section class="overview glass-panel">
+                <h2>Network Overview</h2>
+                <div class="metrics">
+                    <div class="metric-card">
+                        <span class="metric-label">Avg Congestion</span>
+                        <span class="metric-value" id="val-congestion">--%</span>
+                    </div>
+                    <div class="metric-card">
+                        <span class="metric-label">Max Congestion</span>
+                        <span class="metric-value" id="val-max-congestion">--%</span>
+                    </div>
+                    <div class="metric-card">
+                        <span class="metric-label">Avg Speed</span>
+                        <span class="metric-value" id="val-speed">-- km/h</span>
+                    </div>
+                </div>
+            </section>
+
+            <section class="hotspots glass-panel">
+                <div class="section-header">
+                    <h2>Congestion Hotspots</h2>
+                    <button class="btn-primary" id="btn-export">Export Data</button>
+                </div>
+                <div class="hotspot-list" id="hotspot-container">
+                    <div class="loading-state">Loading data...</div>
+                </div>
+            </section>
+        </main>
+        
+        <div class="background-effects">
+            <div class="glow-orb orb-1"></div>
+            <div class="glow-orb orb-2"></div>
+            <div class="glow-orb orb-3"></div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

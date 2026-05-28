@@ -1,0 +1,37 @@
+{
+  "name": "traffic-reader-backend",
+  "version": "1.0.0",
+  "description": "Real-time traffic analysis system for Kyzylorda",
+  "main": "src/app.js",
+  "scripts": {
+    "dev": "nodemon src/app.js",
+    "start": "node src/app.js",
+    "analyze": "python ../analysis/analyze.py",
+    "collect": "node src/dataCollectorRunner.js",
+    "test": "echo \"No tests yet\"",
+    "data-export": "node scripts/export-data.js",
+    "db-reset": "rm database.db && echo 'Database reset'"
+  },
+  "keywords": [
+    "traffic",
+    "kyzylorda",
+    "analysis",
+    "real-time"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.3",
+    "axios": "^1.3.0",
+    "sqlite3": "^5.1.6",
+    "body-parser": "^1.20.2"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.20"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}

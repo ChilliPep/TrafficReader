@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TrafficReader | Kyzylorda Traffic Pulse</title>
+    <meta name="description" content="Traffic intelligence dashboard for Kyzylorda city corridors.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-shell">
+        <header class="topbar">
+            <div class="brand-block">
+                <div class="brand-mark" aria-hidden="true">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+                <div>
+                    <p class="eyebrow">Kyzylorda urban mobility</p>
+                    <h1>TrafficReader</h1>
+                </div>
+            </div>
+
+            <div class="topbar-status">
+                <div class="status-pill">
+                    <span class="live-dot" aria-hidden="true"></span>
+                    <span id="collector-mode">loading</span>
+                </div>
+                <div class="status-pill muted">
+                    <span>Next local refresh</span>
+                    <strong id="refresh-countdown">15s</strong>
+                </div>
+            </div>
+        </header>
+
+        <main class="workspace">
+            <section class="map-panel" aria-label="Traffic map">
+                <div class="panel-head">
+                    <div>
+                        <p class="eyebrow">Live city snapshot</p>
+                        <h2 id="city-state-title">Loading network state</h2>
+                    </div>
+                    <div class="update-block">
+                        <span>Last data point</span>
+                        <strong id="last-updated">--</strong>
+                    </div>
+                </div>
+
+                <div class="city-map" id="city-map">
+                    <svg id="traffic-map" viewBox="0 0 1000 720" role="img" aria-label="Kyzylorda traffic corridors"></svg>
+                    <div class="map-legend" aria-label="Traffic legend">
+                        <span><i class="legend-free"></i>Free</span>
+                        <span><i class="legend-light"></i>Light</span>
+                        <span><i class="legend-medium"></i>Medium</span>
+                        <span><i class="legend-heavy"></i>Heavy</span>
+                        <span><i class="legend-severe"></i>Severe</span>
+                    </div>
+                </div>
+            </section>
+
+            <aside class="insight-panel" aria-label="Traffic insights">
+                <section class="kpi-grid">
+                    <article class="kpi-card">
+                        <span>Avg congestion</span>
+                        <strong id="kpi-congestion">--%</strong>
+                    </article>
+                    <article class="kpi-card">
+                        <span>Avg speed</span>
+                        <strong id="kpi-speed">--</strong>
+                    </article>
+                    <article class="kpi-card">
+                        <span>Avg delay</span>
+                        <strong id="kpi-delay">--</strong>
+                    </article>
+                    <article class="kpi-card">
+                        <span>API budget</span>
+                        <strong id="kpi-quota">--</strong>
+                    </article>
+                </section>
+
+                <section class="panel-block">
+                    <div class="panel-head compact">
+                        <div>
+                            <p class="eyebrow">Priority list</p>
+                            <h2>Congestion hotspots</h2>
+                        </div>
+                    </div>
+                    <div class="hotspot-list" id="hotspot-list">
+                        <div class="empty-state">Waiting for first snapshot</div>
+                    </div>
+                </section>
+            </aside>
+        </main>
+
+        <section class="analysis-grid">
+            <article class="detail-panel">
+                <div class="panel-head compact">
+                    <div>
+                        <p class="eyebrow">Selected corridor</p>
+                        <h2 id="segment-title">Select a road segment</h2>
+                    </div>
+                    <button class="ghost-button" id="export-button" type="button">Export JSON</button>
+                </div>
+
+                <div class="segment-metrics" id="segment-metrics"></div>
+                <div class="sparkline-wrap">
+                    <div class="chart-head">
+                        <span>Last samples</span>
+                        <strong id="history-label">--</strong>
+                    </div>
+                    <svg id="history-chart" viewBox="0 0 720 180" aria-label="Congestion history chart"></svg>
+                </div>
+            </article>
+
+            <article class="detail-panel">
+                <div class="panel-head compact">
+                    <div>
+                        <p class="eyebrow">No-ML prediction</p>
+                        <h2>Next 4 hours</h2>
+                    </div>
+                </div>
+                <div class="forecast-list" id="forecast-list"></div>
+            </article>
+
+            <article class="detail-panel">
+                <div class="panel-head compact">
+                    <div>
+                        <p class="eyebrow">District lens</p>
+                        <h2>Area pressure</h2>
+                    </div>
+                </div>
+                <div class="district-list" id="district-list"></div>
+            </article>
+
+            <article class="detail-panel">
+                <div class="panel-head compact">
+                    <div>
+                        <p class="eyebrow">Crowd signal</p>
+                        <h2>Incident report</h2>
+                    </div>
+                </div>
+
+                <form class="incident-form" id="incident-form">
+                    <label>
+                        Corridor
+                        <select id="incident-segment" name="segment_id"></select>
+                    </label>
+                    <label>
+                        Type
+                        <select id="incident-type" name="type">
+                            <option value="jam">Traffic jam</option>
+                            <option value="roadwork">Roadwork</option>
+                            <option value="accident">Accident</option>
+                            <option value="hazard">Hazard</option>
+                            <option value="report">Other report</option>
+                        </select>
+                    </label>
+                    <label>
+                        Short title
+                        <input id="incident-title" name="title" maxlength="80" placeholder="Slow traffic near market" required>
+                    </label>
+                    <label>
+                        Details
+                        <textarea id="incident-description" name="description" rows="3" maxlength="500" placeholder="Optional context"></textarea>
+                    </label>
+                    <button class="primary-button" type="submit">Send report</button>
+                    <p class="form-status" id="incident-status" aria-live="polite"></p>
+                </form>
+            </article>
+        </section>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
