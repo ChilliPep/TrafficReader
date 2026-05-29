@@ -9,6 +9,21 @@ const state = {
     countdown: REFRESH_SECONDS
 };
 
+let map;
+let segmentLayerGroup;
+let incidentLayerGroup;
+const segmentMarkers = new Map();
+const SEGMENT_ID_PATTERN = /^[a-z0-9_-]{3,50}$/i;
+
+const incidentTypeLabel = {
+    jam: 'Traffic jam',
+    roadwork: 'Roadwork',
+    accident: 'Accident',
+    hazard: 'Hazard',
+    police: 'Police',
+    report: 'Other report'
+};
+
 const statusLabel = {
     free: 'Free',
     light: 'Light',
@@ -35,13 +50,21 @@ function formatPercent(value) {
 }
 
 function formatSpeed(value) {
-    return `${Math.round(Number(value || 0))} km/h`;
+    const speed = Math.round(Number(value || 0));
+    const clamped = Math.max(5, Math.min(90, speed));
+    return `${clamped} km/h`;
 }
 
 function formatDelay(seconds) {
     const value = Math.round(Number(seconds || 0));
     if (value < 60) return `${value}s`;
     return `${Math.round(value / 60)}m`;
+}
+
+function formatSource(source) {
+    const value = String(source || '').toLowerCase();
+    if (value.includes('2gis')) return '2GIS';
+    return 'Synthetic';
 }
 
 function formatClock(iso) {
@@ -106,13 +129,26 @@ function getSelectedSegment() {
     return state.snapshot?.segments?.find((segment) => segment.segment_id === state.selectedSegmentId) || null;
 }
 
+function getStatusColor(status) {
+    const colors = {
+        free: '#45b97c',
+        light: '#a9c75f',
+        medium: '#d5a541',
+        heavy: '#d96961',
+        severe: '#b9414d'
+    };
+    return colors[status || 'free'];
+}
+
 function renderSnapshot() {
     const { snapshot } = state;
     if (!snapshot) return;
 
-    qs('#collector-mode').textContent = snapshot.collector?.mode === '2gis_routing'
+    qs('#collector-mode').textContent = snapshot.source === '2gis'
         ? '2GIS routing mode'
-        : 'Demo-safe synthetic mode';
+        : snapshot.collector?.mode === '2gis_routing'
+            ? '2GIS routing mode'
+            : 'Demo-safe synthetic mode';
     qs('#city-state-title').textContent = `Network is ${snapshot.city?.status || 'loading'}`;
     qs('#last-updated').textContent = formatClock(snapshot.updated_at);
     qs('#kpi-congestion').textContent = formatPercent(snapshot.statistics?.avg_congestion);
@@ -123,83 +159,215 @@ function renderSnapshot() {
     renderMap();
     renderHotspots();
     renderDistricts();
+    renderIncidents();
     populateIncidentSegments();
+    syncIncidentFormWithSelection();
+}
+
+function getSegmentGeoPoint(segment) {
+    const lon = Number(segment.longitude);
+    const lat = Number(segment.latitude);
+    if (Number.isFinite(lon) && Number.isFinite(lat)) {
+        return [lon, lat];
+    }
+
+    const polyline = segment.polyline || [];
+    if (polyline.length > 0 && Array.isArray(polyline[0])) {
+        return [Number(polyline[0][0]), Number(polyline[0][1])];
+    }
+
+    return null;
+}
+
+function initMap() {
+    map = L.map('traffic-map', {
+        zoomControl: false
+    }).setView([44.838, 65.502], 14);
+
+    L.control.zoom({ position: 'topright' }).addTo(map);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://openstreetmap.org">OpenStreetMap</a> contributors',
+        maxZoom: 19
+    }).addTo(map);
+
+    segmentLayerGroup = L.featureGroup().addTo(map);
+    incidentLayerGroup = L.featureGroup().addTo(map);
+
+    window.addEventListener('resize', () => {
+        if (map) map.invalidateSize();
+    });
+}
+
+function focusSegmentOnMap(segmentId, zoom = 15) {
+    const marker = segmentMarkers.get(segmentId);
+    if (!marker || !map) return;
+    map.flyTo(marker.getLatLng(), zoom, { duration: 0.45 });
+    marker.openTooltip();
+}
+
+function fitAllSegments() {
+    if (!map || segmentLayerGroup.getLayers().length === 0) return;
+    map.fitBounds(segmentLayerGroup.getBounds(), { padding: [48, 48], maxZoom: 14 });
 }
 
 function renderMap() {
-    const svg = qs('#traffic-map');
     const segments = state.snapshot?.segments || [];
-    svg.innerHTML = '';
+    segmentLayerGroup.clearLayers();
+    segmentMarkers.clear();
 
     if (segments.length === 0) {
-        svg.innerHTML = '<text x="40" y="80" class="map-label">No traffic data yet</text>';
         return;
     }
 
-    const points = segments.flatMap((segment) => segment.polyline || []);
-    const lonValues = points.map((point) => point[0]);
-    const latValues = points.map((point) => point[1]);
-    const minLon = Math.min(...lonValues);
-    const maxLon = Math.max(...lonValues);
-    const minLat = Math.min(...latValues);
-    const maxLat = Math.max(...latValues);
-    const padding = 80;
-
-    function project(point) {
-        const [lon, lat] = point;
-        const x = padding + ((lon - minLon) / Math.max(maxLon - minLon, 0.0001)) * (1000 - padding * 2);
-        const y = 720 - padding - ((lat - minLat) / Math.max(maxLat - minLat, 0.0001)) * (720 - padding * 2);
-        return [x, y];
-    }
-
-    function pathFor(polyline) {
-        return polyline.map((point, index) => {
-            const [x, y] = project(point);
-            return `${index === 0 ? 'M' : 'L'} ${x.toFixed(1)} ${y.toFixed(1)}`;
-        }).join(' ');
-    }
-
-    const districtLayer = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-    districtLayer.setAttribute('opacity', '0.34');
-    svg.appendChild(districtLayer);
-
     segments.forEach((segment) => {
-        const polyline = segment.polyline || [];
-        if (polyline.length < 2) return;
-        const path = pathFor(polyline);
-        const strokeWidth = 8 + Number(segment.priority || 3);
+        const geoPoint = getSegmentGeoPoint(segment);
+        if (!geoPoint || !Number.isFinite(geoPoint[0]) || !Number.isFinite(geoPoint[1])) {
+            return;
+        }
+
+        const [lon, lat] = geoPoint;
         const isSelected = segment.segment_id === state.selectedSegmentId;
+        const congestion = Math.max(0, Math.min(100, Number(segment.congestion_percent || 0)));
+        const radius = 8 + Math.round(congestion / 8);
+        const color = getStatusColor(segment.status);
 
-        const shadow = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-        shadow.setAttribute('d', path);
-        shadow.setAttribute('class', 'road-shadow');
-        shadow.setAttribute('stroke-width', String(strokeWidth + 8));
-        svg.appendChild(shadow);
+        const halo = L.circleMarker([lat, lon], {
+            radius: radius + 7,
+            stroke: false,
+            fillColor: color,
+            fillOpacity: isSelected ? 0.32 : 0.16
+        }).addTo(segmentLayerGroup);
 
-        const road = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-        road.setAttribute('d', path);
-        road.setAttribute('class', `traffic-road ${getStatusClass(segment.status)}${isSelected ? ' selected' : ''}`);
-        road.setAttribute('stroke-width', String(strokeWidth));
-        road.dataset.segmentId = segment.segment_id;
-        road.addEventListener('click', () => selectSegment(segment.segment_id));
-        svg.appendChild(road);
+        const marker = L.circleMarker([lat, lon], {
+            radius: isSelected ? radius + 3 : radius,
+            color: '#0f1215',
+            weight: isSelected ? 3 : 2,
+            fillColor: color,
+            fillOpacity: 0.9
+        }).addTo(segmentLayerGroup);
 
-        const middle = project(polyline[Math.floor(polyline.length / 2)]);
-        const node = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-        node.setAttribute('cx', middle[0].toFixed(1));
-        node.setAttribute('cy', middle[1].toFixed(1));
-        node.setAttribute('r', isSelected ? '9' : '6');
-        node.setAttribute('class', `map-node ${getStatusClass(segment.status)}`);
-        node.addEventListener('click', () => selectSegment(segment.segment_id));
-        svg.appendChild(node);
+        marker.on('click', () => selectSegment(segment.segment_id));
+        halo.on('click', () => selectSegment(segment.segment_id));
 
-        const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-        label.setAttribute('x', String(middle[0] + 12));
-        label.setAttribute('y', String(middle[1] - 10));
-        label.setAttribute('class', 'map-label');
-        label.textContent = segment.name.replace(' Street', '').replace(' Avenue', ' Ave');
-        label.addEventListener('click', () => selectSegment(segment.segment_id));
-        svg.appendChild(label);
+        marker.bindTooltip(segment.name.replace(' Street', '').replace(' Avenue', ' Ave'), {
+            direction: 'top',
+            offset: [0, -8],
+            className: 'map-tooltip'
+        });
+
+        marker.bindPopup(`
+            <div class="map-popup">
+                <strong>${escapeHtml(segment.name)}</strong><br>
+                ${escapeHtml(segment.district || 'Kyzylorda')}<br>
+                Congestion: ${formatPercent(segment.congestion_percent)}<br>
+                Speed: ${formatSpeed(segment.speed_kmh)}<br>
+                Source: ${escapeHtml(formatSource(segment.source))}
+            </div>
+        `);
+
+        segmentMarkers.set(segment.segment_id, marker);
+    });
+
+    if (!map._segmentsBoundsFitted) {
+        fitAllSegments();
+        map._segmentsBoundsFitted = true;
+    }
+
+    if (state.selectedSegmentId) {
+        focusSegmentOnMap(state.selectedSegmentId, map.getZoom());
+    }
+
+    renderIncidentsOnMap();
+}
+
+function renderIncidentsOnMap() {
+    if (!incidentLayerGroup) return;
+    incidentLayerGroup.clearLayers();
+
+    const incidents = state.snapshot?.incidents || [];
+    incidents.forEach((incident) => {
+        const lat = Number(incident.latitude);
+        const lon = Number(incident.longitude);
+        if (!Number.isFinite(lat) || !Number.isFinite(lon)) return;
+
+        const marker = L.circleMarker([lat, lon], {
+            radius: 9,
+            color: '#6bb8c7',
+            weight: 3,
+            fillColor: '#101214',
+            fillOpacity: 0.95
+        }).addTo(incidentLayerGroup);
+
+        marker.bindTooltip(`${incidentTypeLabel[incident.type] || incident.type}: ${incident.title}`, {
+            direction: 'top',
+            offset: [0, -8],
+            className: 'map-tooltip incident-tooltip'
+        });
+
+        marker.bindPopup(`
+            <div class="map-popup">
+                <strong>${escapeHtml(incident.title)}</strong><br>
+                ${escapeHtml(incidentTypeLabel[incident.type] || incident.type)}<br>
+                ${escapeHtml(incident.segment_name || 'Unknown corridor')}<br>
+                ${formatClock(incident.created_at)}
+            </div>
+        `);
+
+        marker.on('click', () => {
+            if (incident.segment_id) {
+                selectSegment(incident.segment_id);
+            } else {
+                map.flyTo([lat, lon], 15, { duration: 0.45 });
+            }
+        });
+    });
+}
+
+function formatTimeLeft(iso) {
+    if (!iso) return '';
+    const diffMs = new Date(iso).getTime() - Date.now();
+    if (diffMs <= 0) return 'expiring soon';
+    const hours = Math.floor(diffMs / (60 * 60 * 1000));
+    const minutes = Math.floor((diffMs % (60 * 60 * 1000)) / (60 * 1000));
+    if (hours > 0) return `${hours}h ${minutes}m left`;
+    return `${minutes}m left`;
+}
+
+function renderIncidents() {
+    const list = qs('#incident-list');
+    const count = qs('#incident-count');
+    const incidents = state.snapshot?.incidents || [];
+
+    count.textContent = String(incidents.length);
+
+    if (incidents.length === 0) {
+        list.innerHTML = '<div class="empty-state">No active crowd reports</div>';
+        return;
+    }
+
+    list.innerHTML = incidents.map((incident) => `
+        <button class="incident-item" type="button" data-incident-id="${escapeHtml(incident.id)}" data-segment-id="${escapeHtml(incident.segment_id || '')}" data-lat="${escapeHtml(incident.latitude)}" data-lon="${escapeHtml(incident.longitude)}">
+            <span class="incident-type">${escapeHtml(incidentTypeLabel[incident.type] || incident.type)}</span>
+            <span class="incident-title">${escapeHtml(incident.title)}</span>
+            <span class="incident-meta">${escapeHtml(incident.segment_name || 'Unknown corridor')} · ${escapeHtml(formatTimeLeft(incident.expires_at))}</span>
+        </button>
+    `).join('');
+
+    list.querySelectorAll('.incident-item').forEach((button) => {
+        button.addEventListener('click', () => {
+            const segmentId = button.dataset.segmentId;
+            if (segmentId) {
+                selectSegment(segmentId);
+                return;
+            }
+
+            const lat = Number(button.dataset.lat);
+            const lon = Number(button.dataset.lon);
+            if (map && Number.isFinite(lat) && Number.isFinite(lon)) {
+                map.flyTo([lat, lon], 15, { duration: 0.45 });
+            }
+        });
     });
 }
 
@@ -264,6 +432,7 @@ function renderDistricts() {
 async function selectSegment(segmentId) {
     state.selectedSegmentId = segmentId;
     renderSnapshot();
+    focusSegmentOnMap(segmentId);
     await refreshSelectedSegment();
 }
 
@@ -293,6 +462,10 @@ function renderSegmentDetail() {
         <div class="segment-stat">
             <span>Efficiency</span>
             <strong>${efficiency}/100</strong>
+        </div>
+        <div class="segment-stat">
+            <span>Data source</span>
+            <strong>${escapeHtml(formatSource(segment.source))}</strong>
         </div>
     `;
 }
@@ -353,49 +526,112 @@ function renderForecast() {
 
 function populateIncidentSegments() {
     const select = qs('#incident-segment');
-    const segments = state.snapshot?.segments || [];
-    const currentValue = select.value;
+    const segments = [...(state.snapshot?.segments || [])].sort((a, b) => {
+        return String(a.name).localeCompare(String(b.name));
+    });
+    const preferredValue = state.selectedSegmentId || select.value;
 
-    select.innerHTML = segments.map((segment) => `
-        <option value="${escapeHtml(segment.segment_id)}">${escapeHtml(segment.name)}</option>
-    `).join('');
+    if (segments.length === 0) {
+        select.innerHTML = '<option value="">No corridors loaded</option>';
+        select.disabled = true;
+        return;
+    }
 
-    if (currentValue && segments.some((segment) => segment.segment_id === currentValue)) {
-        select.value = currentValue;
-    } else if (state.selectedSegmentId) {
+    select.disabled = false;
+    select.innerHTML = segments.map((segment) => {
+        const district = segment.district || 'Kyzylorda';
+        const congestion = formatPercent(segment.congestion_percent);
+        return `<option value="${escapeHtml(segment.segment_id)}">${escapeHtml(segment.name)} · ${escapeHtml(district)} · ${congestion}</option>`;
+    }).join('');
+
+    if (preferredValue && segments.some((segment) => segment.segment_id === preferredValue)) {
+        select.value = preferredValue;
+    } else {
+        select.value = segments[0].segment_id;
+    }
+}
+
+function syncIncidentFormWithSelection() {
+    const select = qs('#incident-segment');
+    if (!select || select.disabled || !state.selectedSegmentId) return;
+
+    const exists = [...select.options].some((option) => option.value === state.selectedSegmentId);
+    if (exists) {
         select.value = state.selectedSegmentId;
     }
 }
 
+function updateIncidentFieldHints() {
+    const title = qs('#incident-title');
+    const description = qs('#incident-description');
+    qs('#incident-title-hint').textContent = `${title.value.length} / 80`;
+    qs('#incident-description-hint').textContent = `${description.value.length} / 500`;
+}
+
+function resetIncidentFormFields() {
+    qs('#incident-title').value = '';
+    qs('#incident-description').value = '';
+    updateIncidentFieldHints();
+    syncIncidentFormWithSelection();
+}
+
 async function submitIncident(event) {
     event.preventDefault();
-    const form = event.currentTarget;
     const status = qs('#incident-status');
-    const formData = new FormData(form);
+    const submitButton = qs('#incident-submit');
+    const formData = new FormData(event.currentTarget);
     const body = {
-        segment_id: String(formData.get('segment_id') || ''),
+        segment_id: String(formData.get('segment_id') || '').trim(),
         type: String(formData.get('type') || 'report'),
         title: String(formData.get('title') || '').trim(),
         description: String(formData.get('description') || '').trim()
     };
 
-    if (!body.title) {
-        status.textContent = 'Add a short title before sending.';
+    if (!body.segment_id) {
+        status.textContent = 'Select a corridor from the current list.';
+        status.className = 'form-status error-state-inline';
         return;
     }
 
+    if (!body.title) {
+        status.textContent = 'Add a short title before sending.';
+        status.className = 'form-status error-state-inline';
+        return;
+    }
+
+    if (!SEGMENT_ID_PATTERN.test(body.segment_id)) {
+        status.textContent = 'Invalid corridor id. Refresh the page.';
+        status.className = 'form-status error-state-inline';
+        return;
+    }
+
+    status.className = 'form-status';
     status.textContent = 'Sending report...';
+    submitButton.disabled = true;
+
     try {
-        await fetchJson(`${API_BASE}/incidents`, {
+        const response = await fetch(`${API_BASE}/incidents`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(body)
         });
-        form.reset();
-        status.textContent = 'Report saved. It will decay automatically after a few hours.';
+        const payload = await response.json().catch(() => ({}));
+
+        if (!response.ok) {
+            if (response.status === 429) {
+                throw new Error(payload.error || 'Too many requests. Wait a minute and try again.');
+            }
+            throw new Error(payload.error || `Request failed: ${response.status}`);
+        }
+
+        resetIncidentFormFields();
+        status.textContent = `Report saved for ${payload.segment_name || 'selected corridor'}. Visible for ~3 hours.`;
         await refreshSnapshot();
     } catch (error) {
-        status.textContent = 'Report was not saved. Backend rejected the request.';
+        status.textContent = error.message || 'Report was not saved. Try again.';
+        status.className = 'form-status error-state-inline';
+    } finally {
+        submitButton.disabled = false;
     }
 }
 
@@ -411,9 +647,23 @@ function bindEvents() {
     qs('#export-button').addEventListener('click', () => {
         window.open(`${API_BASE}/export?days=7`, '_blank');
     });
+    qs('#fit-map-button').addEventListener('click', fitAllSegments);
+    qs('#refresh-now-button').addEventListener('click', () => {
+        refreshSnapshot();
+    });
     qs('#incident-form').addEventListener('submit', submitIncident);
+    qs('#incident-title').addEventListener('input', updateIncidentFieldHints);
+    qs('#incident-description').addEventListener('input', updateIncidentFieldHints);
+    qs('#incident-segment').addEventListener('change', (event) => {
+        const segmentId = event.currentTarget.value;
+        if (segmentId && segmentId !== state.selectedSegmentId) {
+            selectSegment(segmentId);
+        }
+    });
+    updateIncidentFieldHints();
 }
 
+initMap();
 bindEvents();
 refreshSnapshot();
 setInterval(refreshSnapshot, REFRESH_SECONDS * 1000);

@@ -1,0 +1,295 @@
+--- START OF FILE text/html ---
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GlowByte - Gold AI Analytics</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Space+Grotesque:wght@300;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #050505;
+            --gold-main: #D4AF37;
+            --gold-bright: #FFD700;
+            --gold-glow: rgba(255, 215, 0, 0.7);
+            --gold-glass: rgba(15, 15, 15, 0.85);
+            --text-color: #ffffff;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Space Grotesque', sans-serif; cursor: none; }
+        body { background-color: var(--bg-dark); color: var(--text-color); overflow-x: hidden; }
+
+        /* --- ФОН И ЧЕРНАЯ ДЫРА --- */
+        .video-bg { position: fixed; top: 50%; left: 50%; min-width: 100%; min-height: 100%; transform: translate(-50%, -50%); z-index: -2; object-fit: cover; filter: brightness(0.4); }
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle, transparent 10%, rgba(0,0,0,0.9) 90%); z-index: -1; }
+
+        /* КУРСОР */
+        #cursor { position: fixed; width: 15px; height: 15px; background: #000; border: 2px solid var(--gold-bright); box-shadow: 0 0 15px var(--gold-bright); z-index: 10001; pointer-events: none; transform: translate(-50%, -50%); }
+        #follower { position: fixed; width: 250px; height: 250px; background: radial-gradient(circle, rgba(212, 175, 55, 0.15) 0%, transparent 70%); z-index: 10000; pointer-events: none; transform: translate(-50%, -50%); }
+
+        /* ШАПКА */
+        header { padding: 30px 10%; position: fixed; width: 100%; z-index: 100; font-family: 'Orbitron'; color: var(--gold-bright); letter-spacing: 5px; }
+
+        /* ГЛАВНЫЙ ЭКРАН */
+        .hero { height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+        .hero h1 { font-family: 'Orbitron'; font-size: 5rem; color: var(--gold-bright); text-shadow: 0 0 30px var(--gold-glow); }
+
+        /* ЗАГРУЗКА */
+        .upload-section { padding: 100px 10%; text-align: center; }
+        .upload-box { border: 1px solid var(--gold-main); padding: 50px; background: rgba(212, 175, 55, 0.02); position: relative; }
+        #file-input { position: absolute; top:0; left:0; width:100%; height:100%; opacity:0; }
+
+        /* ДАШБОРД */
+        #dashboard { display: none; padding: 120px 5% 50px; animation: fadeIn 1s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .tabs { display: flex; gap: 10px; margin-bottom: 30px; overflow-x: auto; }
+        .tab-btn { background: rgba(255,255,255,0.05); border: 1px solid #333; color: #888; padding: 12px 20px; font-family: 'Orbitron'; font-size: 10px; transition: 0.3s; }
+        .tab-btn.active { border-color: var(--gold-bright); color: var(--gold-bright); background: rgba(212, 175, 55, 0.1); box-shadow: 0 0 15px var(--gold-glow); }
+
+        .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .kpi-card { background: var(--gold-glass); border: 1px solid #222; padding: 25px; border-left: 4px solid var(--gold-bright); }
+        .kpi-val { font-family: 'Orbitron'; font-size: 28px; color: var(--gold-bright); margin-top: 10px; }
+
+        /* ГРАФИК (ПАЛОЧКИ - ИСПРАВЛЕНО) */
+        .chart-container { background: var(--gold-glass); border: 1px solid #222; padding: 40px; position: relative; }
+        .y-axis-label { font-family: 'Orbitron'; color: var(--gold-bright); margin-bottom: 30px; font-size: 14px; }
+        
+        .bars-flex { 
+            display: flex; 
+            align-items: flex-end; /* Важно: палочки растут от дна */
+            justify-content: space-around; 
+            height: 350px; /* Фиксированная высота контейнера */
+            border-bottom: 2px solid #333;
+            padding-bottom: 10px;
+        }
+
+        .bar-wrapper { 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            flex: 1; 
+            height: 100%; /* Занимает всю высоту для анимации */
+            justify-content: flex-end; 
+        }
+
+        .bar { 
+            width: 60px; 
+            background: linear-gradient(to top, var(--gold-main), var(--gold-bright), #fff); 
+            height: 0; /* Начальное состояние - 0 */
+            transition: height 2s cubic-bezier(0.1, 0.7, 0.1, 1); /* Плавный рост */
+            box-shadow: 0 0 30px var(--gold-glow);
+            border-radius: 4px 4px 0 0;
+            position: relative;
+            display: flex;
+            justify-content: center;
+        }
+
+        .bar-inner-text { 
+            position: absolute; 
+            top: -30px; /* Процент над палочкой */
+            font-family: 'Orbitron'; 
+            font-weight: bold; 
+            color: var(--gold-bright); 
+            font-size: 14px;
+            text-shadow: 0 0 10px #000;
+        }
+
+        .bar-name { 
+            margin-top: 20px; 
+            font-family: 'Orbitron'; 
+            font-size: 10px; 
+            color: #777; 
+            text-transform: uppercase; 
+        }
+
+        /* ТАБЛИЦЫ И ФОРМЫ */
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th { text-align: left; padding: 10px; color: #555; font-family: 'Orbitron'; font-size: 10px; border-bottom: 1px solid #222; }
+        td { padding: 15px 10px; border-bottom: 1px solid #111; font-size: 14px; }
+
+        .predictor-box input { width: 100%; padding: 15px; background: #000; border: 1px solid #333; color: #fff; margin-bottom: 10px; }
+        .btn-action { background: var(--gold-bright); color: #000; border: none; padding: 15px 30px; font-family: 'Orbitron'; font-weight: bold; width: 100%; cursor: none; }
+
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+    <video autoplay muted loop playsinline class="video-bg">
+        <source src="https://res.cloudinary.com/dhopughp0/video/upload/11_hqwf4s.mp4" type="video/mp4">
+    </video>
+    <div class="overlay"></div>
+    <div id="cursor"></div>
+    <div id="follower"></div>
+
+    <header>GLOWBYTE.AI</header>
+
+    <div id="hero-screen">
+        <section class="hero">
+            <h1>GOLD STANDARD</h1>
+            <p style="letter-spacing: 10px; color: #666;">PREMIUM AI INFRASTRUCTURE</p>
+        </section>
+
+        <section class="upload-section">
+            <div class="upload-box">
+                <input type="file" id="file-input">
+                <div style="font-family: 'Orbitron'; color: var(--gold-bright);">[ ЗАГРУЗИТЬ DATA-SET ДЛЯ АНАЛИЗА ]</div>
+            </div>
+            <div id="status" style="margin-top: 30px; font-family: 'Orbitron'; color: var(--gold-bright);"></div>
+        </section>
+    </div>
+
+    <main id="dashboard">
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('t-over', this)">Overview</button>
+            <button class="tab-btn" onclick="switchTab('t-summ', this)">Executive Summary</button>
+            <button class="tab-btn" onclick="switchTab('t-reg', this)">Regions Map</button>
+            <button class="tab-btn" onclick="switchTab('t-pred', this)">Predictor</button>
+            <button class="tab-btn" onclick="switchTab('t-anom', this)">Anomalies</button>
+            <button class="tab-btn" onclick="switchTab('t-inj', this)">Data Injection</button>
+        </div>
+
+        <div class="kpi-grid">
+            <div class="kpi-card"><div>TOTAL RECORDS</div><div class="kpi-val">152,408</div></div>
+            <div class="kpi-card"><div>TOTAL COST</div><div class="kpi-val">12,400,000 ₸</div></div>
+            <div class="kpi-card"><div>AI RELIABILITY</div><div class="kpi-val" style="color: #00ff88;">99.9%</div></div>
+        </div>
+
+        <!-- ВКЛАДКА С ГРАФИКАМИ -->
+        <div id="t-over" class="tab-content">
+            <div class="chart-container">
+                <div class="y-axis-label">Seasonality Analysis (Efficiency %)</div>
+                <div class="bars-flex">
+                    <div class="bar-wrapper">
+                        <div class="bar" data-h="40%"><span class="bar-inner-text">40%</span></div>
+                        <div class="bar-name">Янв</div>
+                    </div>
+                    <div class="bar-wrapper">
+                        <div class="bar" data-h="65%"><span class="bar-inner-text">65%</span></div>
+                        <div class="bar-name">Фев</div>
+                    </div>
+                    <div class="bar-wrapper">
+                        <div class="bar" data-h="90%"><span class="bar-inner-text">90%</span></div>
+                        <div class="bar-name">Мар</div>
+                    </div>
+                    <div class="bar-wrapper">
+                        <div class="bar" data-h="75%"><span class="bar-inner-text">75%</span></div>
+                        <div class="bar-name">Апр</div>
+                    </div>
+                    <div class="bar-wrapper">
+                        <div class="bar" data-h="95%"><span class="bar-inner-text">95%</span></div>
+                        <div class="bar-name">Май</div>
+                    </div>
+                    <div class="bar-wrapper">
+                        <div class="bar" data-h="100%"><span class="bar-inner-text">100%</span></div>
+                        <div class="bar-name">Июн</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ОСТАЛЬНЫЕ ВКЛАДКИ (ФУНКЦИОНАЛ ИЗ ФОТО) -->
+        <div id="t-summ" class="tab-content hidden">
+            <div class="chart-container">
+                <h3 style="font-family: 'Orbitron'; margin-bottom: 20px;">Analytical Hypotheses</h3>
+                <div style="border-left: 3px solid #00ff88; padding: 15px; background: rgba(0,255,136,0.05); margin-bottom: 10px;">
+                    <b style="color: #00ff88;">[CONFIRMED]</b> Рост потребления в праздничные периоды.
+                </div>
+                <div style="border-left: 3px solid #ff4444; padding: 15px; background: rgba(255,68,68,0.05);">
+                    <b style="color: #ff4444;">[REJECTED]</b> Влияние курса валют на текущий дата-сет.
+                </div>
+            </div>
+        </div>
+
+        <div id="t-reg" class="tab-content hidden">
+            <div class="chart-container">
+                <table>
+                    <tr><th>REGION ID</th><th>CITY</th><th>SPENDING</th><th>ANOMALY</th></tr>
+                    <tr><td>01</td><td>Almaty</td><td>5.2M</td><td>None</td></tr>
+                    <tr><td>02</td><td>Astana</td><td>4.8M</td><td>Low</td></tr>
+                </table>
+            </div>
+        </div>
+
+        <div id="t-pred" class="tab-content hidden">
+            <div class="chart-container predictor-box">
+                <input type="text" placeholder="Region Code (e.g. 77)">
+                <input type="text" placeholder="Product ID">
+                <button class="btn-action">RUN AI PREDICTION</button>
+            </div>
+        </div>
+
+        <div id="t-inj" class="tab-content hidden">
+            <div class="chart-container">
+                <h3 style="font-family: 'Orbitron'; margin-bottom: 20px;">Data Injection Terminal</h3>
+                <input type="text" placeholder="JSON DATA BLOB" style="width: 100%; padding: 20px; background: #000; border: 1px solid #333; color: var(--gold-bright);">
+                <button class="btn-action" style="margin-top: 15px;">EXECUTE INJECTION</button>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        const cursor = document.getElementById('cursor');
+        const follower = document.getElementById('follower');
+        const fileInput = document.getElementById('file-input');
+        const status = document.getElementById('status');
+        const dashboard = document.getElementById('dashboard');
+        const heroScreen = document.getElementById('hero-screen');
+
+        // ДВИЖЕНИЕ КУРСОРОВ
+        document.addEventListener('mousemove', (e) => {
+            cursor.style.left = e.clientX + 'px';
+            cursor.style.top = e.clientY + 'px';
+            follower.style.left = e.clientX + 'px';
+            follower.style.top = e.clientY + 'px';
+        });
+
+        // ЛОГИКА ЗАГРУЗКИ
+        fileInput.addEventListener('change', () => {
+            let p = 0;
+            const anim = setInterval(() => {
+                p += 5;
+                status.innerHTML = "GOLD AI SCANNING: " + p + "%";
+                if (p >= 100) {
+                    clearInterval(anim);
+                    showDashboard();
+                }
+            }, 80);
+        });
+
+        function showDashboard() {
+            heroScreen.style.display = 'none';
+            dashboard.style.display = 'block';
+            window.scrollTo(0,0);
+            
+            // Запуск анимации палочек (с небольшой задержкой для плавности)
+            setTimeout(animateBars, 300);
+        }
+
+        // ФУНКЦИЯ РОСТА ПАЛОЧЕК
+        function animateBars() {
+            const bars = document.querySelectorAll('.bar');
+            bars.forEach(bar => {
+                const targetHeight = bar.getAttribute('data-h');
+                bar.style.height = targetHeight; // Палочка вырастает до нужного %
+            });
+        }
+
+        // ПЕРЕКЛЮЧЕНИЕ ТАБОВ
+        function switchTab(id, btn) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(id).classList.remove('hidden');
+            btn.classList.add('active');
+            
+            // Если вернулись на Overview, перезапускаем анимацию
+            if (id === 't-over') {
+                document.querySelectorAll('.bar').forEach(b => b.style.height = '0');
+                setTimeout(animateBars, 100);
+            }
+        }
+    </script>
+</body>
+</html>

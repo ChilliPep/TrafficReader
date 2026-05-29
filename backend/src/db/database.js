@@ -131,6 +131,7 @@ db.serialize(() => {
     db.run('CREATE INDEX IF NOT EXISTS idx_metrics_segment_time ON traffic_metrics(segment_id, timestamp DESC)');
     db.run('CREATE INDEX IF NOT EXISTS idx_metrics_time ON traffic_metrics(timestamp DESC)');
     db.run('CREATE INDEX IF NOT EXISTS idx_incidents_status_time ON incidents(status, created_at DESC)');
+    db.run('PRAGMA journal_mode = WAL;');
 });
 
 const normalizeSegmentRow = (row) => ({
@@ -259,7 +260,11 @@ async function getStatistics(windowMinutes = 60) {
         SELECT
             AVG(congestion_percent) AS avg_congestion,
             MAX(congestion_percent) AS max_congestion,
-            AVG(speed_kmh) AS avg_speed,
+            AVG(CASE
+                WHEN speed_kmh < 5 THEN 5
+                WHEN speed_kmh > 90 THEN 90
+                ELSE speed_kmh
+            END) AS avg_speed,
             AVG(delay_seconds) AS avg_delay_seconds,
             AVG(severity_score) AS avg_severity,
             COUNT(*) AS samples,
@@ -315,27 +320,45 @@ async function exportDataset(days) {
     `, [Number(days) || 7]);
 }
 
+async function getSegmentById(segmentId) {
+    if (!segmentId) return null;
+    const row = await get('SELECT * FROM traffic_segments WHERE segment_id = ? AND active = 1', [segmentId]);
+    return row ? normalizeSegmentRow(row) : null;
+}
+
 async function insertIncident(incident) {
-    const segment = incident.segment_id ? await get('SELECT * FROM traffic_segments WHERE segment_id = ?', [incident.segment_id]) : null;
+    const segment = incident.segment_id ? await getSegmentById(incident.segment_id) : null;
+    if (incident.segment_id && !segment) {
+        const error = new Error('Unknown corridor id');
+        error.code = 'UNKNOWN_SEGMENT';
+        throw error;
+    }
+
     const expiresAt = incident.expires_at || new Date(Date.now() + (3 * 60 * 60 * 1000)).toISOString();
+    const createdAt = new Date().toISOString();
     const result = await run(`
         INSERT INTO incidents (
             segment_id, type, title, description, latitude, longitude, confidence, status, created_at, expires_at
         )
         VALUES (?, ?, ?, ?, ?, ?, ?, 'active', ?, ?)
     `, [
-        incident.segment_id || null,
+        segment ? segment.segment_id : null,
         incident.type || 'report',
         incident.title || 'User report',
         incident.description || '',
-        incident.latitude || (segment && segment.latitude) || null,
-        incident.longitude || (segment && segment.longitude) || null,
+        incident.latitude ?? (segment && segment.latitude) ?? null,
+        incident.longitude ?? (segment && segment.longitude) ?? null,
         incident.confidence || 0.55,
-        new Date().toISOString(),
+        createdAt,
         expiresAt
     ]);
 
-    return result.lastID;
+    return get(`
+        SELECT i.*, s.name AS segment_name, s.district AS segment_district
+        FROM incidents i
+        LEFT JOIN traffic_segments s ON s.segment_id = i.segment_id
+        WHERE i.id = ?
+    `, [result.lastID]);
 }
 
 async function getActiveIncidents() {
@@ -350,7 +373,7 @@ async function getActiveIncidents() {
     `);
 }
 
-async function recordApiUsage(provider, endpoint, units = 1, hardLimit = 3000, reservedUnits = 450) {
+async function recordApiUsage(provider, endpoint, units = 1, hardLimit = 1000, reservedUnits = 100) {
     const date = new Date().toISOString().slice(0, 10);
     await run(`
         INSERT INTO api_usage_daily (date, provider, endpoint, used_units, hard_limit, reserved_units, updated_at)
@@ -367,8 +390,8 @@ async function getQuotaStatus() {
     const date = new Date().toISOString().slice(0, 10);
     const rows = await all('SELECT * FROM api_usage_daily WHERE date = ?', [date]);
     const used = rows.reduce((sum, row) => sum + Number(row.used_units || 0), 0);
-    const hardLimit = rows[0] ? Number(rows[0].hard_limit || 3000) : 3000;
-    const reservedUnits = rows[0] ? Number(rows[0].reserved_units || 450) : 450;
+    const hardLimit = rows[0] ? Number(rows[0].hard_limit || 1000) : 1000;
+    const reservedUnits = rows[0] ? Number(rows[0].reserved_units || 100) : 100;
     const remaining = Math.max(0, hardLimit - used);
     const safeRemaining = Math.max(0, hardLimit - reservedUnits - used);
 
@@ -424,6 +447,7 @@ module.exports = {
     getSegmentHistory,
     getDistrictAnalytics,
     exportDataset,
+    getSegmentById,
     insertIncident,
     getActiveIncidents,
     recordApiUsage,

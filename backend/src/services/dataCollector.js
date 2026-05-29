@@ -44,6 +44,7 @@ async function getMetricForSegment(segment) {
 
     const quota = await db.getQuotaStatus();
     if (quota.status === 'locked') {
+        console.warn(`2GIS quota guard active for ${segment.segment_id}; using synthetic data`);
         const fallback = estimateMetric(segment);
         return {
             ...fallback,
@@ -58,6 +59,7 @@ async function getMetricForSegment(segment) {
         await db.setCachedRoute(cacheKey, '2gis', { metric: result.metric, summary: result.summary }, 300);
         return result.metric;
     } catch (error) {
+        console.warn(`2GIS fallback for ${segment.segment_id}: ${error.message}`);
         const fallback = estimateMetric(segment);
         return {
             ...fallback,

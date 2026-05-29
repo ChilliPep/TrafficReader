@@ -1,3 +1,13 @@
+// GIS standard: coordinates are [longitude, latitude]
+function haversineKm(lon1, lat1, lon2, lat2) {
+    const toRad = (deg) => (deg * Math.PI) / 180;
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
+    const a = Math.sin(dLat / 2) ** 2 +
+        Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
+    return 6371 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
 const segments = [
     {
         segment_id: 'seg_kyzylorda_1',
@@ -7,14 +17,11 @@ const segments = [
         priority: 5,
         length_km: 3.0,
         baseline_speed_kmh: 44,
-        latitude: 44.8530,
-        longitude: 65.5030,
+        latitude: 44.842390,
+        longitude: 65.502240,
         coordinates: [
-            [65.4850, 44.8545],
-            [65.4920, 44.8540],
-            [65.5000, 44.8533],
-            [65.5080, 44.8525],
-            [65.5160, 44.8518]
+            [65.502240, 44.842390],
+            [65.502440, 44.842390]
         ]
     },
     {
@@ -25,14 +32,11 @@ const segments = [
         priority: 4,
         length_km: 2.5,
         baseline_speed_kmh: 42,
-        latitude: 44.8580,
-        longitude: 65.5050,
+        latitude: 44.840005,
+        longitude: 65.493447,
         coordinates: [
-            [65.4880, 44.8595],
-            [65.4950, 44.8590],
-            [65.5030, 44.8582],
-            [65.5110, 44.8575],
-            [65.5180, 44.8568]
+            [65.493447, 44.840005],
+            [65.493647, 44.840005]
         ]
     },
     {
@@ -43,14 +47,11 @@ const segments = [
         priority: 5,
         length_km: 3.2,
         baseline_speed_kmh: 46,
-        latitude: 44.8480,
-        longitude: 65.5020,
+        latitude: 44.832582,
+        longitude: 65.507194,
         coordinates: [
-            [65.4830, 44.8495],
-            [65.4910, 44.8490],
-            [65.5000, 44.8483],
-            [65.5090, 44.8475],
-            [65.5170, 44.8468]
+            [65.507194, 44.832582],
+            [65.507394, 44.832582]
         ]
     },
     {
@@ -61,14 +62,11 @@ const segments = [
         priority: 4,
         length_km: 1.8,
         baseline_speed_kmh: 36,
-        latitude: 44.8530,
-        longitude: 65.4920,
+        latitude: 44.842838,
+        longitude: 65.502001,
         coordinates: [
-            [65.4910, 44.8610],
-            [65.4915, 44.8570],
-            [65.4920, 44.8530],
-            [65.4925, 44.8490],
-            [65.4930, 44.8450]
+            [65.502001, 44.842838],
+            [65.502201, 44.842838]
         ]
     },
     {
@@ -79,14 +77,11 @@ const segments = [
         priority: 3,
         length_km: 1.6,
         baseline_speed_kmh: 34,
-        latitude: 44.8530,
-        longitude: 65.5120,
+        latitude: 44.838500,
+        longitude: 65.510500,
         coordinates: [
-            [65.5110, 44.8610],
-            [65.5113, 44.8570],
-            [65.5118, 44.8530],
-            [65.5122, 44.8490],
-            [65.5125, 44.8450]
+            [65.510500, 44.838500],
+            [65.510700, 44.838500]
         ]
     },
     {
@@ -97,14 +92,11 @@ const segments = [
         priority: 4,
         length_km: 2.0,
         baseline_speed_kmh: 38,
-        latitude: 44.8560,
-        longitude: 65.5010,
+        latitude: 44.836000,
+        longitude: 65.500500,
         coordinates: [
-            [65.5000, 44.8630],
-            [65.5005, 44.8590],
-            [65.5010, 44.8550],
-            [65.5012, 44.8510],
-            [65.5015, 44.8470]
+            [65.500500, 44.836000],
+            [65.500700, 44.836000]
         ]
     },
     {
@@ -115,14 +107,11 @@ const segments = [
         priority: 5,
         length_km: 1.5,
         baseline_speed_kmh: 30,
-        latitude: 44.8510,
-        longitude: 65.5060,
+        latitude: 44.835500,
+        longitude: 65.505500,
         coordinates: [
-            [65.4960, 44.8515],
-            [65.5000, 44.8512],
-            [65.5050, 44.8508],
-            [65.5100, 44.8505],
-            [65.5140, 44.8502]
+            [65.505500, 44.835500],
+            [65.505700, 44.835500]
         ]
     },
     {
@@ -133,14 +122,11 @@ const segments = [
         priority: 3,
         length_km: 1.2,
         baseline_speed_kmh: 28,
-        latitude: 44.8560,
-        longitude: 65.5070,
+        latitude: 44.841000,
+        longitude: 65.506500,
         coordinates: [
-            [65.5060, 44.8610],
-            [65.5063, 44.8590],
-            [65.5067, 44.8560],
-            [65.5070, 44.8540],
-            [65.5073, 44.8520]
+            [65.506500, 44.841000],
+            [65.506700, 44.841000]
         ]
     },
     {
@@ -151,27 +137,35 @@ const segments = [
         priority: 3,
         length_km: 4.4,
         baseline_speed_kmh: 58,
-        latitude: 44.8460,
-        longitude: 65.5400,
+        latitude: 44.828000,
+        longitude: 65.512000,
         coordinates: [
-            [65.5200, 44.8490],
-            [65.5300, 44.8480],
-            [65.5400, 44.8465],
-            [65.5500, 44.8455],
-            [65.5600, 44.8445]
+            [65.512000, 44.828000],
+            [65.512200, 44.828000]
         ]
     }
 ];
 
-module.exports = segments.map((segment) => ({
-    ...segment,
-    baseline_travel_time_seconds: Math.round((segment.length_km / segment.baseline_speed_kmh) * 3600),
-    start: {
+module.exports = segments.map((segment) => {
+    const start = {
         lon: segment.coordinates[0][0],
         lat: segment.coordinates[0][1]
-    },
-    end: {
+    };
+    const end = {
         lon: segment.coordinates[segment.coordinates.length - 1][0],
         lat: segment.coordinates[segment.coordinates.length - 1][1]
-    }
-}));
+    };
+    const probeLengthKm = Math.max(0.15, roundProbe(haversineKm(start.lon, start.lat, end.lon, end.lat)));
+
+    return {
+        ...segment,
+        probe_length_km: probeLengthKm,
+        baseline_travel_time_seconds: Math.round((probeLengthKm / segment.baseline_speed_kmh) * 3600),
+        start,
+        end
+    };
+});
+
+function roundProbe(value) {
+    return Math.round(value * 1000) / 1000;
+}

@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Database Systems — Exam Q&A</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,600;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0d0f;
+    --surface: #141417;
+    --border: #222228;
+    --accent: #e8ff47;
+    --accent2: #47c8ff;
+    --text: #e8e8f0;
+    --muted: #6a6a7e;
+    --q-bg: #141417;
+    --a-bg: #0f1a0f;
+    --a-border: #2a4a2a;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-weight: 300;
+    line-height: 1.7;
+    padding: 0;
+  }
+
+  /* Fixed header */
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(13,13,15,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  header h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.6rem;
+    letter-spacing: 0.12em;
+    color: var(--accent);
+  }
+
+  header span {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+  }
+
+  /* Main content */
+  main {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 60px 32px 120px;
+  }
+
+  /* Q&A card */
+  .qa {
+    margin-bottom: 6px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+    animation: fadeUp 0.3s ease both;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .question {
+    background: var(--q-bg);
+    padding: 20px 28px;
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.1rem;
+    color: var(--accent);
+    letter-spacing: 0.05em;
+    min-width: 36px;
+    padding-top: 1px;
+    flex-shrink: 0;
+  }
+
+  .question p {
+    font-size: 0.97rem;
+    font-weight: 400;
+    color: #c8c8d8;
+    line-height: 1.6;
+  }
+
+  .answer {
+    background: var(--a-bg);
+    border-left: 3px solid var(--accent2);
+    padding: 18px 28px 18px 24px;
+    font-size: 0.92rem;
+    color: #b8e8c8;
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-weight: 300;
+    line-height: 1.65;
+  }
+
+  .answer strong {
+    color: var(--accent2);
+    font-weight: 600;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.88rem;
+  }
+
+  .answer code {
+    font-family: 'IBM Plex Mono', monospace;
+    background: rgba(71,200,255,0.08);
+    color: var(--accent2);
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-size: 0.85rem;
+  }
+
+  /* Section labels */
+  .section-label {
+    font-family: 'Bebas Neue', sans-serif;
+    letter-spacing: 0.2em;
+    font-size: 0.85rem;
+    color: var(--muted);
+    margin: 48px 0 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* Scroll hint */
+  .scroll-hint {
+    text-align: center;
+    padding: 32px 0 0;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+  }
+
+  .dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); margin: 0 4px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Database Systems — SQL Exam Prep</h1>
+  <span>75 QUESTIONS &amp; ANSWERS</span>
+</header>
+
+<main>
+  <div class="scroll-hint">scroll down to study <span class="dot"></span></div>
+
+  <div class="section-label">PART I — SINGLE ANSWER QUESTIONS (1–60)</div>
+
+  <!-- Q1 -->
+  <div class="qa">
+    <div class="question"><span class="num">01</span><p>What is defined as a collection of related data with implicit meaning?</p></div>
+    <div class="answer"><strong>DATABASE</strong> — A database is a collection of related data with an implicit meaning, representing some aspect of the real world (a "mini-world" or Universe of Discourse).</div>
+  </div>
+
+  <!-- Q2 -->
+  <div class="qa">
+    <div class="question"><span class="num">02</span><p>Which system suffers from data dependence where the file structure is defined in the program code?</p></div>
+    <div class="answer"><strong>TRADITIONAL FILE SYSTEM</strong> — In a file-based system, file structure and access logic are hard-coded into application programs, causing data dependence: any change to the file format requires modifying every program that uses it.</div>
+  </div>
+
+  <!-- Q3 -->
+  <div class="qa">
+    <div class="question"><span class="num">03</span><p>In the ANSI-SPARC architecture, which level describes how the data is actually stored on the disk?</p></div>
+    <div class="answer"><strong>INTERNAL LEVEL (Physical Level)</strong> — The internal/physical level deals with how data is physically stored on disk: file structures, indexes, storage allocation, and access paths.</div>
+  </div>
+
+  <!-- Q4 -->
+  <div class="qa">
+    <div class="question"><span class="num">04</span><p>Which property ensures that a change in the physical storage structure does not affect the conceptual schema?</p></div>
+    <div class="answer"><strong>PHYSICAL DATA INDEPENDENCE</strong> — Physical data independence means changes to the internal/physical level (e.g., switching storage format or index) do not require changes to the conceptual schema or user views.</div>
+  </div>
+
+  <!-- Q5 -->
+  <div class="qa">
+    <div class="question"><span class="num">05</span><p>Which component of a DBMS is responsible for ensuring the database remains in a consistent state during a crash?</p></div>
+    <div class="answer"><strong>RECOVERY MANAGER</strong> — The recovery manager (part of the transaction manager) uses logs and checkpoints to restore the database to a consistent state after a crash, undoing incomplete transactions and redoing committed ones.</div>
+  </div>
+
+  <!-- Q6 -->
+  <div class="qa">
+    <div class="question"><span class="num">06</span><p>What is the main advantage of a relational database over a hierarchical one?</p></div>
+    <div class="answer"><strong>FLEXIBILITY &amp; NO REDUNDANCY</strong> — Relational databases allow flexible many-to-many relationships without data duplication; hierarchical models force tree structures that cannot represent M:N relationships without redundancy, and navigation is rigid (parent → child only).</div>
+  </div>
+
+  <!-- Q7 -->
+  <div class="qa">
+    <div class="question"><span class="num">07</span><p>In SQL, which command is used to add a new column to an existing table?</p></div>
+    <div class="answer"><strong><code>ALTER TABLE ... ADD COLUMN</code></strong> — Example: <code>ALTER TABLE employees ADD COLUMN department VARCHAR(50);</code> This is a DDL statement that modifies the table schema.</div>
+  </div>
+
+  <!-- Q8 -->
+  <div class="qa">
+    <div class="question"><span class="num">08</span><p>Which data type would you use for a column that stores long descriptions of products?</p></div>
+    <div class="answer"><strong><code>TEXT</code></strong> — The <code>TEXT</code> data type (or <code>VARCHAR(MAX)</code> in some systems) is used for variable-length strings of large or unknown size, ideal for long descriptions.</div>
+  </div>
+
+  <!-- Q9 -->
+  <div class="qa">
+    <div class="question"><span class="num">09</span><p>A "Weak Entity" in an ER diagram is identified by its relationship with what?</p></div>
+    <div class="answer"><strong>ITS OWNER (STRONG) ENTITY</strong> — A weak entity cannot be uniquely identified by its own attributes alone. It depends on a strong (owner) entity through an identifying relationship. Its partial key + the owner's primary key together form its full identifier.</div>
+  </div>
+
+  <!-- Q10 -->
+  <div class="qa">
+    <div class="question"><span class="num">10</span><p>What does the "I" in ACID properties stand for?</p></div>
+    <div class="answer"><strong>ISOLATION</strong> — Isolation means that concurrent transactions execute as if they were serial (one at a time). Intermediate states of a transaction are not visible to other transactions.</div>
+  </div>
+
+  <!-- Q11 -->
+  <div class="qa">
+    <div class="question"><span class="num">11</span><p>Which SQL operator is used to filter results based on a range of values?</p></div>
+    <div class="answer"><strong><code>BETWEEN</code></strong> — Example: <code>WHERE salary BETWEEN 3000 AND 7000</code>. It is inclusive of both boundary values. Equivalent to <code>&gt;= low AND &lt;= high</code>.</div>
+  </div>
+
+  <!-- Q12 -->
+  <div class="qa">
+    <div class="question"><span class="num">12</span><p>The process of "Normalization" is primarily used to achieve what?</p></div>
+    <div class="answer"><strong>ELIMINATION OF REDUNDANCY &amp; UPDATE ANOMALIES</strong> — Normalization organizes data into relations that minimize redundancy and avoid insertion, deletion, and update anomalies by ensuring each fact is stored in exactly one place.</div>
+  </div>
+
+  <!-- Q13 -->
+  <div class="qa">
+    <div class="question"><span class="num">13</span><p>Which normal form deals with removing partial functional dependencies?</p></div>
+    <div class="answer"><strong>SECOND NORMAL FORM (2NF)</strong> — A table is in 2NF if it is in 1NF and every non-key attribute is fully functionally dependent on the entire primary key (no partial dependencies on a part of a composite key).</div>
+  </div>
+
+  <!-- Q14 -->
+  <div class="qa">
+    <div class="question"><span class="num">14</span><p>A "Foreign Key" must reference which column in another table?</p></div>
+    <div class="answer"><strong>PRIMARY KEY (or UNIQUE KEY)</strong> — A foreign key must reference a column (or set of columns) that is declared as a primary key or unique constraint in the referenced table, ensuring referential integrity.</div>
+  </div>
+
+  <!-- Q15 -->
+  <div class="qa">
+    <div class="question"><span class="num">15</span><p>What is the default sorting order of the ORDER BY clause in SQL?</p></div>
+    <div class="answer"><strong>ASCENDING (<code>ASC</code>)</strong> — By default, <code>ORDER BY column</code> sorts from the smallest to largest value. Use <code>DESC</code> keyword to reverse the order.</div>
+  </div>
+
+  <!-- Q16 -->
+  <div class="qa">
+    <div class="question"><span class="num">16</span><p>Which clause is used to filter rows AFTER an aggregate function has been applied?</p></div>
+    <div class="answer"><strong><code>HAVING</code></strong> — <code>HAVING</code> filters groups after <code>GROUP BY</code> and aggregation. Unlike <code>WHERE</code> (which filters individual rows before aggregation), <code>HAVING</code> works on aggregated results. Example: <code>HAVING COUNT(*) &gt; 5</code>.</div>
+  </div>
+
+  <!-- Q17 -->
+  <div class="qa">
+    <div class="question"><span class="num">17</span><p>In the Relational Model, what is the cardinality of a relation?</p></div>
+    <div class="answer"><strong>NUMBER OF ROWS (TUPLES)</strong> — Cardinality = number of tuples in a relation. Degree = number of columns (attributes). These are distinct concepts: cardinality changes with data, degree changes with schema modifications.</div>
+  </div>
+
+  <!-- Q18 -->
+  <div class="qa">
+    <div class="question"><span class="num">18</span><p>Which SQL command is used to empty a table but keep its structure?</p></div>
+    <div class="answer"><strong><code>TRUNCATE TABLE</code></strong> — <code>TRUNCATE</code> removes all rows from a table but preserves the table definition, constraints, and indexes. It is faster than <code>DELETE</code> (no row-by-row logging) and cannot be rolled back in most DBMSs.</div>
+  </div>
+
+  <!-- Q19 -->
+  <div class="qa">
+    <div class="question"><span class="num">19</span><p>What type of relationship exists between a "Student" and a "Course"?</p></div>
+    <div class="answer"><strong>MANY-TO-MANY (M:N)</strong> — A student can enroll in many courses, and a course can have many students. This requires a junction/bridge table (e.g., <code>Enrollment</code>) with foreign keys to both tables.</div>
+  </div>
+
+  <!-- Q20 -->
+  <div class="qa">
+    <div class="question"><span class="num">20</span><p>Which symbol represents an attribute in an ER Diagram?</p></div>
+    <div class="answer"><strong>ELLIPSE (OVAL)</strong> — In standard ER notation: Entities = rectangles, Relationships = diamonds, Attributes = ellipses. Double ellipse = multi-valued attribute; dashed ellipse = derived attribute.</div>
+  </div>
+
+  <!-- Q21 -->
+  <div class="qa">
+    <div class="question"><span class="num">21</span><p>What is "Metadata"?</p></div>
+    <div class="answer"><strong>DATA ABOUT DATA</strong> — Metadata describes the structure, format, constraints, and meaning of the actual data. In a DBMS, the data dictionary (system catalog) stores metadata such as table names, column types, indexes, and access privileges.</div>
+  </div>
+
+  <!-- Q22 -->
+  <div class="qa">
+    <div class="question"><span class="num">22</span><p>Which SQL join returns all rows when there is a match in one of the tables?</p></div>
+    <div class="answer"><strong>FULL OUTER JOIN</strong> — <code>FULL OUTER JOIN</code> returns all rows from both tables: matched rows combined, unmatched rows from the left table with NULLs for the right columns, and unmatched rows from the right table with NULLs for the left columns.</div>
+  </div>
+
+  <!-- Q23 -->
+  <div class="qa">
+    <div class="question"><span class="num">23</span><p>The "Generalization" process in database design is which type of approach?</p></div>
+    <div class="answer"><strong>BOTTOM-UP APPROACH</strong> — Generalization starts from specific entities and abstracts common attributes into a higher-level (superclass) entity. It is bottom-up. The reverse, Specialization, is top-down (starting from a general entity and creating subclasses).</div>
+  </div>
+
+  <!-- Q24 -->
+  <div class="qa">
+    <div class="question"><span class="num">24</span><p>What is a "Composite Attribute"?</p></div>
+    <div class="answer"><strong>AN ATTRIBUTE MADE OF SUB-ATTRIBUTES</strong> — A composite attribute can be subdivided into smaller meaningful parts. Example: <em>Full Name</em> → <em>First Name</em> + <em>Last Name</em>; or <em>Address</em> → <em>Street</em> + <em>City</em> + <em>Zip</em>.</div>
+  </div>
+
+  <!-- Q25 -->
+  <div class="qa">
+    <div class="question"><span class="num">25</span><p>Which SQL keyword is used to return only different values?</p></div>
+    <div class="answer"><strong><code>DISTINCT</code></strong> — Example: <code>SELECT DISTINCT department FROM employees;</code> eliminates duplicate values from the result set. Can also be used inside aggregate functions: <code>COUNT(DISTINCT column)</code>.</div>
+  </div>
+
+  <!-- Q26 -->
+  <div class="qa">
+    <div class="question"><span class="num">26</span><p>What is the purpose of the COMMIT command in SQL?</p></div>
+    <div class="answer"><strong>PERMANENTLY SAVES A TRANSACTION</strong> — <code>COMMIT</code> ends a transaction and makes all changes permanent in the database. Once committed, changes cannot be undone with <code>ROLLBACK</code>. It satisfies the Durability property of ACID.</div>
+  </div>
+
+  <!-- Q27 -->
+  <div class="qa">
+    <div class="question"><span class="num">27</span><p>In PostgreSQL, which tool is commonly used as a GUI to manage databases?</p></div>
+    <div class="answer"><strong>pgAdmin</strong> — pgAdmin is the most popular open-source graphical administration and development tool for PostgreSQL. It provides a browser-based interface for managing databases, running queries, viewing query plans, and monitoring server activity.</div>
+  </div>
+
+  <!-- Q28 -->
+  <div class="qa">
+    <div class="question"><span class="num">28</span><p>What is a "Recursive Relationship"?</p></div>
+    <div class="answer"><strong>A RELATIONSHIP OF AN ENTITY WITH ITSELF</strong> — A recursive (unary) relationship is when an entity participates in a relationship with itself. Example: an <em>Employee</em> entity with a "manages" relationship — one employee manages other employees of the same type.</div>
+  </div>
+
+  <!-- Q29 -->
+  <div class="qa">
+    <div class="question"><span class="num">29</span><p>Which operator is used to combine the results of two SELECT statements?</p></div>
+    <div class="answer"><strong><code>UNION</code></strong> — <code>UNION</code> combines result sets of two queries, removing duplicates. <code>UNION ALL</code> keeps duplicates (and is faster). Both queries must have the same number of columns with compatible data types.</div>
+  </div>
+
+  <!-- Q30 -->
+  <div class="qa">
+    <div class="question"><span class="num">30</span><p>A "Candidate key" that is not chosen as the Primary Key is called what?</p></div>
+    <div class="answer"><strong>ALTERNATE KEY</strong> — A candidate key is any attribute (or set of attributes) that uniquely identifies tuples. If multiple candidates exist, one is chosen as the primary key; the remaining candidates are called alternate keys.</div>
+  </div>
+
+  <!-- Q31 -->
+  <div class="qa">
+    <div class="question"><span class="num">31</span><p>Which integrity rule states that "No part of a primary key can be null"?</p></div>
+    <div class="answer"><strong>ENTITY INTEGRITY RULE</strong> — The entity integrity constraint mandates that no attribute forming part of the primary key may hold a NULL value, since the primary key must uniquely and completely identify every tuple.</div>
+  </div>
+
+  <!-- Q32 -->
+  <div class="qa">
+    <div class="question"><span class="num">32</span><p>What does the "Degree" of a relationship represent?</p></div>
+    <div class="answer"><strong>NUMBER OF ENTITIES PARTICIPATING IN THE RELATIONSHIP</strong> — Degree = number of entity types involved: Unary (degree 1, recursive), Binary (degree 2, most common), Ternary (degree 3), etc. Not to be confused with degree of a relation = number of attributes.</div>
+  </div>
+
+  <!-- Q33 -->
+  <div class="qa">
+    <div class="question"><span class="num">33</span><p>Which SQL function returns the average value of a numeric column?</p></div>
+    <div class="answer"><strong><code>AVG()</code></strong> — Example: <code>SELECT AVG(salary) FROM employees;</code>. <code>AVG</code> ignores NULL values. It is an aggregate function used with or without <code>GROUP BY</code>.</div>
+  </div>
+
+  <!-- Q34 -->
+  <div class="qa">
+    <div class="question"><span class="num">34</span><p>What is a "Derived Attribute"?</p></div>
+    <div class="answer"><strong>AN ATTRIBUTE COMPUTED FROM OTHER DATA</strong> — A derived attribute is not physically stored; its value is calculated at query time from other attributes. Example: <em>Age</em> derived from <em>DateOfBirth</em>; <em>Total</em> derived from <em>Price × Quantity</em>. Shown as a dashed ellipse in ER diagrams.</div>
+  </div>
+
+  <!-- Q35 -->
+  <div class="qa">
+    <div class="question"><span class="num">35</span><p>Which SQL command is used to change data inside a table?</p></div>
+    <div class="answer"><strong><code>UPDATE</code></strong> — Example: <code>UPDATE employees SET salary = 5000 WHERE id = 10;</code>. Always use a <code>WHERE</code> clause to avoid updating all rows accidentally. <code>UPDATE</code> is a DML statement.</div>
+  </div>
+
+  <!-- Q36 -->
+  <div class="qa">
+    <div class="question"><span class="num">36</span><p>What is the main characteristic of a "Shared-Nothing" architecture?</p></div>
+    <div class="answer"><strong>EACH NODE HAS ITS OWN PRIVATE MEMORY AND DISK</strong> — In shared-nothing architecture, nodes do not share RAM or storage. Each processes its own data partition independently. This enables high scalability and fault isolation, used in systems like distributed databases and MPP engines.</div>
+  </div>
+
+  <!-- Q37 -->
+  <div class="qa">
+    <div class="question"><span class="num">37</span><p>In a 1:M relationship, where is the Foreign Key usually placed?</p></div>
+    <div class="answer"><strong>ON THE "MANY" SIDE</strong> — In a one-to-many relationship, the foreign key is placed in the table on the "many" side, referencing the primary key of the "one" side. Example: <em>Orders</em> table has a <code>customer_id</code> FK pointing to <em>Customers</em>.</div>
+  </div>
+
+  <!-- Q38 -->
+  <div class="qa">
+    <div class="question"><span class="num">38</span><p>Which level of the ANSI-SPARC model provides "Views" for different users?</p></div>
+    <div class="answer"><strong>EXTERNAL LEVEL (View Level)</strong> — The external level consists of multiple user views, each showing only the portion of the database relevant to that user or application, hiding the rest and providing data independence and security.</div>
+  </div>
+
+  <!-- Q39 -->
+  <div class="qa">
+    <div class="question"><span class="num">39</span><p>What is the standard port for PostgreSQL?</p></div>
+    <div class="answer"><strong>PORT 5432</strong> — PostgreSQL listens on TCP port 5432 by default. This is the IANA-registered port for PostgreSQL. It can be changed in <code>postgresql.conf</code>.</div>
+  </div>
+
+  <!-- Q40 -->
+  <div class="qa">
+    <div class="question"><span class="num">40</span><p>Which constraint ensures that all values in a column are different?</p></div>
+    <div class="answer"><strong><code>UNIQUE</code> CONSTRAINT</strong> — The <code>UNIQUE</code> constraint prevents duplicate values in a column (or combination of columns). Unlike a primary key, a unique column can contain NULL values (in most DBMSs, NULLs are treated as distinct).</div>
+  </div>
+
+  <!-- Q41 -->
+  <div class="qa">
+    <div class="question"><span class="num">41</span><p>What is "Referential Integrity"?</p></div>
+    <div class="answer"><strong>EVERY FOREIGN KEY VALUE MUST MATCH AN EXISTING PRIMARY KEY</strong> — Referential integrity ensures that a foreign key value either matches a primary key in the referenced table or is NULL. It prevents orphan records and is enforced by the DBMS via <code>ON DELETE</code>/<code>ON UPDATE</code> actions.</div>
+  </div>
+
+  <!-- Q42 -->
+  <div class="qa">
+    <div class="question"><span class="num">42</span><p>Which command is used to revoke permissions from a user?</p></div>
+    <div class="answer"><strong><code>REVOKE</code></strong> — Example: <code>REVOKE SELECT ON employees FROM username;</code>. It is a DCL (Data Control Language) statement, the opposite of <code>GRANT</code>. Revoked privileges no longer allow the user to perform the specified operations.</div>
+  </div>
+
+  <!-- Q43 -->
+  <div class="qa">
+    <div class="question"><span class="num">43</span><p>In ER modeling, what is "Aggregation"?</p></div>
+    <div class="answer"><strong>TREATING A RELATIONSHIP AS AN ENTITY</strong> — Aggregation is an abstraction in which a relationship (and the entities it connects) is treated as a higher-level entity that can itself participate in another relationship. Used when a relationship needs to have a relationship with a third entity.</div>
+  </div>
+
+  <!-- Q44 -->
+  <div class="qa">
+    <div class="question"><span class="num">44</span><p>What does the % wildcard represent in the LIKE operator?</p></div>
+    <div class="answer"><strong>ANY SEQUENCE OF ZERO OR MORE CHARACTERS</strong> — In SQL's <code>LIKE</code> pattern matching: <code>%</code> matches any string of any length (including empty). Example: <code>WHERE name LIKE 'A%'</code> finds names starting with "A". The <code>_</code> wildcard matches exactly one character.</div>
+  </div>
+
+  <!-- Q45 -->
+  <div class="qa">
+    <div class="question"><span class="num">45</span><p>Which part of the DBMS handles the parsing of SQL statements?</p></div>
+    <div class="answer"><strong>QUERY PROCESSOR / DDL & DML COMPILER</strong> — The query processor (including the parser and query optimizer) receives SQL statements, checks syntax, validates against the catalog metadata, and compiles/optimizes them into an execution plan before passing to the storage engine.</div>
+  </div>
+
+  <!-- Q46 -->
+  <div class="qa">
+    <div class="question"><span class="num">46</span><p>What are the two main advantages of using a DBMS over a traditional file system?</p></div>
+    <div class="answer"><strong>1. DATA INDEPENDENCE</strong> — Schema changes don't require rewriting application code.<br><br><strong>2. REDUCED REDUNDANCY &amp; CONCURRENT ACCESS / SECURITY</strong> — Central control eliminates duplication, enforces integrity, supports multi-user concurrency, and provides access control and recovery mechanisms.</div>
+  </div>
+
+  <!-- Q47 -->
+  <div class="qa">
+    <div class="question"><span class="num">47</span><p>Which two SQL commands belong to DDL (Data Definition Language)?</p></div>
+    <div class="answer"><strong><code>CREATE</code></strong> and <strong><code>DROP</code></strong> (also <code>ALTER</code>, <code>TRUNCATE</code>) — DDL commands define and modify the database schema (structure). DML commands (<code>SELECT</code>, <code>INSERT</code>, <code>UPDATE</code>, <code>DELETE</code>) manipulate data within that structure.</div>
+  </div>
+
+  <!-- Q48 -->
+  <div class="qa">
+    <div class="question"><span class="num">48</span><p>Which two symbols are used to represent multi-valued and simple attributes in an ER Diagram?</p></div>
+    <div class="answer"><strong>DOUBLE ELLIPSE</strong> = multi-valued attribute (can hold multiple values, e.g., phone numbers).<br><strong>SINGLE ELLIPSE</strong> = simple (single-valued) attribute. Additional: dashed ellipse = derived; composite = ellipse connected to sub-ellipses.</div>
+  </div>
+
+  <!-- Q49 -->
+  <div class="qa">
+    <div class="question"><span class="num">49</span><p>Name two aggregate functions that can be used with the GROUP BY clause.</p></div>
+    <div class="answer"><strong><code>COUNT()</code></strong> — counts rows in each group.<br><strong><code>SUM()</code></strong> — totals a numeric column per group.<br>Others: <code>AVG()</code>, <code>MAX()</code>, <code>MIN()</code>. All aggregate functions collapse multiple rows into a single summary value per group.</div>
+  </div>
+
+  <!-- Q50 -->
+  <div class="qa">
+    <div class="question"><span class="num">50</span><p>Identify the two types of data independence in the three-level architecture.</p></div>
+    <div class="answer"><strong>1. PHYSICAL DATA INDEPENDENCE</strong> — Ability to change the internal/physical schema without changing the conceptual schema.<br><br><strong>2. LOGICAL DATA INDEPENDENCE</strong> — Ability to change the conceptual schema without changing external views or application programs.</div>
+  </div>
+
+  <!-- Q51 -->
+  <div class="qa">
+    <div class="question"><span class="num">51</span><p>Select two types of OUTER JOINs used in SQL.</p></div>
+    <div class="answer"><strong>LEFT OUTER JOIN</strong> — Returns all rows from the left table, NULLs for unmatched right rows.<br><strong>RIGHT OUTER JOIN</strong> — Returns all rows from the right table, NULLs for unmatched left rows.<br>(Third type: <code>FULL OUTER JOIN</code> — all rows from both tables.)</div>
+  </div>
+
+  <!-- Q52 -->
+  <div class="qa">
+    <div class="question"><span class="num">52</span><p>Identify two essential properties of a Primary Key.</p></div>
+    <div class="answer"><strong>1. UNIQUENESS</strong> — Each value must uniquely identify exactly one tuple in the relation; no two rows can share the same primary key value.<br><br><strong>2. NON-NULLABILITY</strong> — No attribute forming part of the primary key may be NULL (Entity Integrity Rule).</div>
+  </div>
+
+  <!-- Q53 -->
+  <div class="qa">
+    <div class="question"><span class="num">53</span><p>Which two components are part of the DBMS Storage Manager?</p></div>
+    <div class="answer"><strong>1. BUFFER MANAGER</strong> — Manages the in-memory buffer pool; brings pages from disk into RAM and decides which pages to evict (replacement policy).<br><br><strong>2. FILE MANAGER</strong> — Manages disk space allocation, file organization, and interaction with the OS file system.</div>
+  </div>
+
+  <!-- Q54 -->
+  <div class="qa">
+    <div class="question"><span class="num">54</span><p>Name two types of keys found in a relational schema (excluding Primary Key).</p></div>
+    <div class="answer"><strong>FOREIGN KEY</strong> — An attribute referencing the primary key of another relation, enforcing referential integrity.<br><strong>CANDIDATE KEY</strong> — Any minimal set of attributes that uniquely identifies tuples; the primary key is chosen from these. Alternate keys are the unchosen candidates.</div>
+  </div>
+
+  <!-- Q55 -->
+  <div class="qa">
+    <div class="question"><span class="num">55</span><p>Which two constraints ensure data quality at the column level?</p></div>
+    <div class="answer"><strong>NOT NULL</strong> — Ensures a column cannot contain NULL values.<br><strong>CHECK</strong> — Validates that column values satisfy a specified condition. Example: <code>CHECK (age &gt;= 0 AND age &lt;= 120)</code>. Both enforce domain integrity at the column level.</div>
+  </div>
+
+  <!-- Q56 -->
+  <div class="qa">
+    <div class="question"><span class="num">56</span><p>Identify two historical data models used before the Relational Model.</p></div>
+    <div class="answer"><strong>1. HIERARCHICAL MODEL</strong> — Organizes data in a tree structure (parent–child). Used in IBM IMS. Cannot handle M:N relationships without redundancy.<br><br><strong>2. NETWORK MODEL</strong> — Uses a graph (pointers/links) to represent many-to-many relationships. Defined by the CODASYL standard (e.g., IDMS).</div>
+  </div>
+
+  <!-- Q57 -->
+  <div class="qa">
+    <div class="question"><span class="num">57</span><p>Which two SQL clauses are essential for sorting and limiting records?</p></div>
+    <div class="answer"><strong><code>ORDER BY</code></strong> — Sorts the result set by one or more columns (ASC or DESC).<br><strong><code>LIMIT</code></strong> (or <code>FETCH FIRST n ROWS ONLY</code> in standard SQL, or <code>TOP</code> in SQL Server) — Restricts the number of rows returned. Together they are used for pagination.</div>
+  </div>
+
+  <!-- Q58 -->
+  <div class="qa">
+    <div class="question"><span class="num">58</span><p>Identify two aspects of "Specialization" in EER modeling.</p></div>
+    <div class="answer"><strong>1. DISJOINT vs. OVERLAPPING</strong> — Disjoint: a subclass entity can belong to only one subclass. Overlapping: an entity can belong to multiple subclasses simultaneously.<br><br><strong>2. TOTAL vs. PARTIAL</strong> — Total: every superclass entity must belong to at least one subclass. Partial: superclass entities may not belong to any subclass.</div>
+  </div>
+
+  <!-- Q59 -->
+  <div class="qa">
+    <div class="question"><span class="num">59</span><p>Name two keywords used to define table relationships in a CREATE TABLE statement.</p></div>
+    <div class="answer"><strong><code>FOREIGN KEY</code></strong> — Declares a referencing column.<br><strong><code>REFERENCES</code></strong> — Specifies the referenced table and column.<br>Example: <code>FOREIGN KEY (dept_id) REFERENCES Department(id)</code>. Together they establish referential integrity between tables.</div>
+  </div>
+
+  <!-- Q60 -->
+  <div class="qa">
+    <div class="question"><span class="num">60</span><p>In the query <code>SELECT department, COUNT(*) FROM Employees WHERE salary &gt; 5000 GROUP BY department HAVING COUNT(*) &gt; 2</code>, what are the two main logical outcomes?</p></div>
+    <div class="answer"><strong>1. FILTERING BEFORE GROUPING</strong> — The <code>WHERE salary &gt; 5000</code> clause filters individual rows first, so only employees earning more than 5000 are included in the grouping.<br><br><strong>2. FILTERING AFTER GROUPING</strong> — The <code>HAVING COUNT(*) &gt; 2</code> clause then filters out departments that have 2 or fewer qualifying employees, returning only departments with more than 2 high earners.</div>
+  </div>
+
+  <div class="section-label">PART II — MULTIPLE ANSWER QUESTIONS (61–75)</div>
+
+  <!-- Q61 -->
+  <div class="qa">
+    <div class="question"><span class="num">61</span><p>What are the three main components (levels) of the ANSI-SPARC architecture?</p></div>
+    <div class="answer">
+      <strong>1. EXTERNAL LEVEL</strong> — Individual user views; what each user or application "sees."<br>
+      <strong>2. CONCEPTUAL LEVEL</strong> — The community/logical view; describes what data is stored and the relationships among entities (the full schema).<br>
+      <strong>3. INTERNAL LEVEL</strong> — The physical storage level; how data is physically stored on disk (files, indexes, etc.).</div>
+  </div>
+
+  <!-- Q62 -->
+  <div class="qa">
+    <div class="question"><span class="num">62</span><p>Identify three fundamental parts of an Entity-Relationship (ER) model.</p></div>
+    <div class="answer">
+      <strong>1. ENTITIES</strong> — Real-world objects or concepts with independent existence (represented as rectangles).<br>
+      <strong>2. ATTRIBUTES</strong> — Properties that describe entities (represented as ellipses).<br>
+      <strong>3. RELATIONSHIPS</strong> — Associations between entities (represented as diamonds), with cardinality and participation constraints.</div>
+  </div>
+
+  <!-- Q63 -->
+  <div class="qa">
+    <div class="question"><span class="num">63</span><p>Which three operations are considered DML (Data Manipulation Language)?</p></div>
+    <div class="answer">
+      <strong>1. <code>INSERT</code></strong> — Adds new rows to a table.<br>
+      <strong>2. <code>UPDATE</code></strong> — Modifies existing rows.<br>
+      <strong>3. <code>DELETE</code></strong> — Removes rows from a table.<br>
+      (Note: <code>SELECT</code> is sometimes classified as DML or as its own DQL category depending on the textbook.)</div>
+  </div>
+
+  <!-- Q64 -->
+  <div class="qa">
+    <div class="question"><span class="num">64</span><p>Choose three types of attributes (Simple, Composite, etc.) in an ER Diagram.</p></div>
+    <div class="answer">
+      <strong>1. SIMPLE (ATOMIC)</strong> — Cannot be divided further (e.g., SSN, Age).<br>
+      <strong>2. COMPOSITE</strong> — Divisible into sub-parts (e.g., Address → Street, City, Zip).<br>
+      <strong>3. MULTI-VALUED</strong> — Can hold multiple values for one entity (e.g., phone numbers). Also notable: Derived attributes (computed from others).</div>
+  </div>
+
+  <!-- Q65 -->
+  <div class="qa">
+    <div class="question"><span class="num">65</span><p>Which three SQL keywords are used together in a basic data retrieval query?</p></div>
+    <div class="answer">
+      <strong>1. <code>SELECT</code></strong> — Specifies which columns to retrieve.<br>
+      <strong>2. <code>FROM</code></strong> — Specifies the table(s) to query.<br>
+      <strong>3. <code>WHERE</code></strong> — Filters rows based on a condition.<br>
+      Together: <code>SELECT column FROM table WHERE condition;</code> — the foundational SQL query structure.</div>
+  </div>
+
+  <!-- Q66 -->
+  <div class="qa">
+    <div class="question"><span class="num">66</span><p>Identify three integrity constraints used in a relational database.</p></div>
+    <div class="answer">
+      <strong>1. DOMAIN CONSTRAINT</strong> — Each attribute value must come from its defined domain (data type, range).<br>
+      <strong>2. ENTITY INTEGRITY</strong> — No primary key attribute can be NULL.<br>
+      <strong>3. REFERENTIAL INTEGRITY</strong> — Every foreign key value must match an existing primary key in the referenced table, or be NULL.</div>
+  </div>
+
+  <!-- Q67 -->
+  <div class="qa">
+    <div class="question"><span class="num">67</span><p>Which three data types are standard in most SQL implementations?</p></div>
+    <div class="answer">
+      <strong>1. <code>INTEGER</code> (INT)</strong> — Whole numbers without decimal points.<br>
+      <strong>2. <code>VARCHAR(n)</code></strong> — Variable-length character strings up to n characters.<br>
+      <strong>3. <code>DATE</code></strong> — Calendar date (year, month, day).<br>
+      Also common: <code>FLOAT</code>, <code>DECIMAL</code>, <code>BOOLEAN</code>, <code>TEXT</code>, <code>TIMESTAMP</code>.</div>
+  </div>
+
+  <!-- Q68 -->
+  <div class="qa">
+    <div class="question"><span class="num">68</span><p>Select the three types of binary relationships between entities (1:1, etc.).</p></div>
+    <div class="answer">
+      <strong>1. ONE-TO-ONE (1:1)</strong> — Each entity in A relates to at most one entity in B, and vice versa. Example: Person ↔ Passport.<br>
+      <strong>2. ONE-TO-MANY (1:M)</strong> — One entity in A relates to many in B. Example: Department → Employees.<br>
+      <strong>3. MANY-TO-MANY (M:N)</strong> — Many entities in A relate to many in B. Example: Students ↔ Courses.</div>
+  </div>
+
+  <!-- Q69 -->
+  <div class="qa">
+    <div class="question"><span class="num">69</span><p>Identify three benefits provided by the Three-Level Architecture.</p></div>
+    <div class="answer">
+      <strong>1. DATA INDEPENDENCE</strong> — Changes at one level don't affect other levels (physical and logical independence).<br>
+      <strong>2. SECURITY &amp; PRIVACY</strong> — Users only see the external view they're authorized for; sensitive data can be hidden.<br>
+      <strong>3. CUSTOMIZED USER VIEWS</strong> — Different users or applications can have tailored views without each needing access to the full schema.</div>
+  </div>
+
+  <!-- Q70 -->
+  <div class="qa">
+    <div class="question"><span class="num">70</span><p>Which three aggregate functions are most commonly used to summarize data?</p></div>
+    <div class="answer">
+      <strong>1. <code>COUNT()</code></strong> — Counts the number of rows (or non-NULL values).<br>
+      <strong>2. <code>SUM()</code></strong> — Totals all numeric values in a column.<br>
+      <strong>3. <code>AVG()</code></strong> — Computes the arithmetic mean of a numeric column.<br>
+      Also widely used: <code>MAX()</code> and <code>MIN()</code>.</div>
+  </div>
+
+  <!-- Q71 -->
+  <div class="qa">
+    <div class="question"><span class="num">71</span><p>Select three modern database architectures (Distributed, Federated, etc.).</p></div>
+    <div class="answer">
+      <strong>1. DISTRIBUTED DATABASE</strong> — Data is stored across multiple physically separate nodes/sites, coordinated to appear as one logical database.<br>
+      <strong>2. FEDERATED DATABASE</strong> — Multiple autonomous databases integrated under a single interface without a central store; each retains its own control.<br>
+      <strong>3. CLOUD DATABASE</strong> — Hosted and managed on cloud infrastructure (DBaaS), offering elastic scaling, high availability, and pay-per-use pricing.</div>
+  </div>
+
+  <!-- Q72 -->
+  <div class="qa">
+    <div class="question"><span class="num">72</span><p>Identify three key steps in creating a relational schema from an ER diagram.</p></div>
+    <div class="answer">
+      <strong>1. MAP STRONG ENTITIES</strong> — Each strong entity type becomes a table; its simple attributes become columns; the primary key attribute becomes the PK.<br>
+      <strong>2. MAP RELATIONSHIPS</strong> — 1:M relationships are implemented by placing the FK on the "many" side; M:N relationships become a new junction table with FKs to both entities.<br>
+      <strong>3. MAP WEAK ENTITIES</strong> — Weak entity becomes a table; its PK = partial key + FK to the owner entity's PK.</div>
+  </div>
+
+  <!-- Q73 -->
+  <div class="qa">
+    <div class="question"><span class="num">73</span><p>Identify three specific characteristics of a "Relation" in the relational model.</p></div>
+    <div class="answer">
+      <strong>1. NO DUPLICATE TUPLES</strong> — Every row in a relation must be unique (enforced by the primary key).<br>
+      <strong>2. ATTRIBUTE VALUES ARE ATOMIC</strong> — Each cell holds a single, indivisible value (First Normal Form).<br>
+      <strong>3. ORDER OF TUPLES / ATTRIBUTES IS IRRELEVANT</strong> — The logical order of rows and columns does not matter; columns are identified by name, not position.</div>
+  </div>
+
+  <!-- Q74 -->
+  <div class="qa">
+    <div class="question"><span class="num">74</span><p>Which three concepts (Weak Entities, Generalization, etc.) are part of "Advanced ER Modeling"?</p></div>
+    <div class="answer">
+      <strong>1. WEAK ENTITIES</strong> — Entities that cannot be uniquely identified without their owner entity; use identifying relationships and partial keys.<br>
+      <strong>2. GENERALIZATION / SPECIALIZATION</strong> — Superclass–subclass hierarchies; EER diagrams extend basic ER to model inheritance.<br>
+      <strong>3. AGGREGATION</strong> — Treating a relationship (and its participating entities) as a higher-level entity that can itself participate in further relationships.</div>
+  </div>
+
+  <!-- Q75 -->
+  <div class="qa">
+    <div class="question"><span class="num">75</span><p>Analyze the result of a LEFT JOIN between a 'Customers' table (5 rows) and 'Orders' table (10 rows) where one customer has no orders. Identify three true statements about the output.</p></div>
+    <div class="answer">
+      <strong>1. THE RESULT CONTAINS AT LEAST 5 ROWS</strong> — A LEFT JOIN guarantees all rows from the left table (Customers) appear in the result, regardless of whether a match exists in Orders.<br>
+      <strong>2. THE UNMATCHED CUSTOMER ROW APPEARS WITH NULLs</strong> — The customer with no orders will still appear in the output, but all columns from the Orders table will be NULL for that row.<br>
+      <strong>3. MATCHED ORDERS INCREASE THE ROW COUNT BEYOND 5</strong> — If some customers have multiple orders, those customers appear multiple times (once per order), so the total result can be more than 5 rows (up to 10 + 1 = 11 if one customer has no orders and others account for all 10 orders).</div>
+  </div>
+
+</main>
+
+</body>
+</html>

@@ -1,6 +1,7 @@
 backend/node_modules/
 backend/exports/
 backend/database.db
+backend/.env
 analysis/output/
 .env
 *.log

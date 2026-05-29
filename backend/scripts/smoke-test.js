@@ -20,7 +20,7 @@ async function main() {
 
     assert(snapshot.latest.length >= 5, 'latest metrics should include seeded segments');
     assert(Number(snapshot.stats.avg_speed) > 0, 'average speed should be positive');
-    assert(snapshot.quota.hard_limit === 3000, 'quota guard should expose default 3000 limit');
+    assert(snapshot.quota.hard_limit === 1000, 'quota guard should expose default 1000 limit');
 
     await new Promise((resolve, reject) => {
         const req = http.request({ method: 'GET', host: 'localhost', port: 3000, path: '/api/health', timeout: 500 }, (res) => {

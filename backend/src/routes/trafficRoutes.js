@@ -1,9 +1,11 @@
 const express = require('express');
 const db = require('../db/database');
 const dataCollector = require('../services/dataCollector');
-const { getTrafficStatus, round } = require('../services/trafficScoring');
+const { getTrafficStatus, round, clamp, URBAN_SPEED_MIN_KMH, URBAN_SPEED_MAX_KMH } = require('../services/trafficScoring');
+const { shouldUseTwoGis } = require('../services/twoGisClient');
 
 const router = express.Router();
+const SEGMENT_ID_PATTERN = /^[a-z0-9_-]{3,50}$/i;
 
 function asyncRoute(handler) {
     return async (req, res) => {
@@ -21,6 +23,29 @@ function asyncRoute(handler) {
 function toNumber(value, fallback) {
     const parsed = Number(value);
     return Number.isFinite(parsed) ? parsed : fallback;
+}
+
+function getApiSourceLabel() {
+    return shouldUseTwoGis() ? '2gis' : 'synthetic';
+}
+
+function normalizeMetricSource(source) {
+    const value = String(source || '').toLowerCase();
+    if (value.includes('2gis')) return '2gis';
+    return 'synthetic';
+}
+
+function validateSegmentId(req, res, next) {
+    const segmentId = String(req.params.id || '');
+    if (!SEGMENT_ID_PATTERN.test(segmentId)) {
+        res.status(400).json({
+            error: 'Invalid segment id format',
+            segment_id: segmentId,
+            timestamp: new Date().toISOString()
+        });
+        return;
+    }
+    next();
 }
 
 function buildForecastFromHistory(history) {
@@ -72,25 +97,34 @@ router.get('/snapshot', asyncRoute(async (req, res) => {
     const updatedAt = latest.reduce((max, item) => {
         if (!item.timestamp) return max;
         return !max || item.timestamp > max ? item.timestamp : max;
-    }, null);
+    }, stats.last_updated || null);
+
+    const segments = latest.map((segment) => ({
+        ...segment,
+        speed_kmh: round(clamp(Number(segment.speed_kmh || 0), URBAN_SPEED_MIN_KMH, URBAN_SPEED_MAX_KMH)),
+        source: normalizeMetricSource(segment.source)
+    }));
 
     res.json({
         timestamp: new Date().toISOString(),
         updated_at: updatedAt,
+        last_updated: updatedAt,
+        source: getApiSourceLabel(),
         city: {
             name: 'Kyzylorda',
             status: buildCityStatus(stats),
-            center: { lat: 44.853, lon: 65.505 }
+            center: { lat: 44.838, lon: 65.502 }
         },
         statistics: {
             avg_congestion: round(Number(stats.avg_congestion || 0)),
             max_congestion: round(Number(stats.max_congestion || 0)),
-            avg_speed: round(Number(stats.avg_speed || 0)),
+            avg_speed: round(clamp(Number(stats.avg_speed || 0), URBAN_SPEED_MIN_KMH, URBAN_SPEED_MAX_KMH)),
             avg_delay_seconds: Math.round(Number(stats.avg_delay_seconds || 0)),
             avg_severity: round(Number(stats.avg_severity || 0)),
-            samples: Number(stats.samples || 0)
+            samples: Number(stats.samples || 0),
+            last_updated: stats.last_updated || updatedAt
         },
-        segments: latest,
+        segments,
         hotspots,
         districts,
         incidents,
@@ -103,6 +137,8 @@ router.get('/segments', asyncRoute(async (req, res) => {
     const segments = await db.getSegments();
     res.json({
         type: 'FeatureCollection',
+        source: getApiSourceLabel(),
+        last_updated: new Date().toISOString(),
         features: segments.map((segment) => ({
             type: 'Feature',
             id: segment.segment_id,
@@ -127,30 +163,46 @@ router.get('/segments', asyncRoute(async (req, res) => {
 router.get('/hotspots', asyncRoute(async (req, res) => {
     const windowMinutes = toNumber(req.query.window_minutes, 60);
     const hotspots = await db.getHotspots(windowMinutes);
+    res.set('X-Traffic-Source', getApiSourceLabel());
+    res.set('X-Traffic-Last-Updated', new Date().toISOString());
     res.json(hotspots);
 }));
 
 router.get('/statistics', asyncRoute(async (req, res) => {
     const windowMinutes = toNumber(req.query.window_minutes, 60);
     const stats = await db.getStatistics(windowMinutes);
-    res.json(stats || {
+    const payload = stats || {
         avg_congestion: 0,
         max_congestion: 0,
         avg_speed: 0
+    };
+
+    res.json({
+        ...payload,
+        source: getApiSourceLabel(),
+        last_updated: payload.last_updated || new Date().toISOString()
     });
 }));
 
-router.get('/segment/:id', asyncRoute(async (req, res) => {
+router.get('/segment/:id', validateSegmentId, asyncRoute(async (req, res) => {
     const limit = toNumber(req.query.limit, 96);
     const history = await db.getSegmentHistory(req.params.id, limit);
-    res.json(history);
+    const lastUpdated = history[0]?.timestamp || new Date().toISOString();
+    res.set('X-Traffic-Source', getApiSourceLabel());
+    res.set('X-Traffic-Last-Updated', lastUpdated);
+    res.json(history.map((row) => ({
+        ...row,
+        source: normalizeMetricSource(row.source)
+    })));
 }));
 
-router.get('/forecast/:id', asyncRoute(async (req, res) => {
+router.get('/forecast/:id', validateSegmentId, asyncRoute(async (req, res) => {
     const history = await db.getSegmentHistory(req.params.id, 96);
     res.json({
         segment_id: req.params.id,
         generated_at: new Date().toISOString(),
+        last_updated: history[0]?.timestamp || null,
+        source: getApiSourceLabel(),
         method: 'historical median + recent trend + rush-hour curve',
         buckets: buildForecastFromHistory(history)
     });
@@ -158,6 +210,8 @@ router.get('/forecast/:id', asyncRoute(async (req, res) => {
 
 router.get('/incidents', asyncRoute(async (req, res) => {
     const incidents = await db.getActiveIncidents();
+    res.set('X-Traffic-Source', getApiSourceLabel());
+    res.set('X-Traffic-Last-Updated', new Date().toISOString());
     res.json(incidents);
 }));
 
@@ -165,39 +219,74 @@ router.post('/incidents', asyncRoute(async (req, res) => {
     const allowedTypes = new Set(['accident', 'roadwork', 'police', 'hazard', 'jam', 'report']);
     const type = allowedTypes.has(req.body.type) ? req.body.type : 'report';
     const title = String(req.body.title || '').trim().slice(0, 80);
+    const segmentId = String(req.body.segment_id || '').trim();
+    const description = String(req.body.description || '').trim().slice(0, 500);
 
     if (!title) {
         res.status(400).json({ error: 'title is required' });
         return;
     }
 
-    const id = await db.insertIncident({
-        segment_id: req.body.segment_id,
-        type,
-        title,
-        description: String(req.body.description || '').trim().slice(0, 500),
-        latitude: req.body.latitude,
-        longitude: req.body.longitude,
-        confidence: 0.55
-    });
+    if (!segmentId) {
+        res.status(400).json({ error: 'segment_id is required' });
+        return;
+    }
 
-    res.status(201).json({ id, status: 'active' });
+    if (!SEGMENT_ID_PATTERN.test(segmentId)) {
+        res.status(400).json({ error: 'Invalid segment id format' });
+        return;
+    }
+
+    try {
+        const incident = await db.insertIncident({
+            segment_id: segmentId,
+            type,
+            title,
+            description,
+            latitude: req.body.latitude,
+            longitude: req.body.longitude,
+            confidence: 0.55
+        });
+
+        res.status(201).json({
+            ...incident,
+            status: 'active',
+            source: getApiSourceLabel(),
+            last_updated: new Date().toISOString()
+        });
+    } catch (error) {
+        if (error.code === 'UNKNOWN_SEGMENT') {
+            res.status(400).json({ error: 'Unknown corridor. Refresh the dashboard and try again.' });
+            return;
+        }
+        throw error;
+    }
 }));
 
 router.get('/districts', asyncRoute(async (req, res) => {
     const windowMinutes = toNumber(req.query.window_minutes, 180);
     const districts = await db.getDistrictAnalytics(windowMinutes);
+    res.set('X-Traffic-Source', getApiSourceLabel());
+    res.set('X-Traffic-Last-Updated', new Date().toISOString());
     res.json(districts);
 }));
 
 router.get('/quota', asyncRoute(async (req, res) => {
     const quota = await db.getQuotaStatus();
-    res.json(quota);
+    res.json({
+        ...quota,
+        source: getApiSourceLabel(),
+        last_updated: new Date().toISOString()
+    });
 }));
 
 router.post('/collect-now', asyncRoute(async (req, res) => {
     const result = await dataCollector.collectData();
-    res.json(result);
+    res.json({
+        ...result,
+        source: getApiSourceLabel(),
+        last_updated: new Date().toISOString()
+    });
 }));
 
 router.get('/export', asyncRoute(async (req, res) => {
@@ -205,6 +294,8 @@ router.get('/export', asyncRoute(async (req, res) => {
     const data = await db.exportDataset(days);
     res.setHeader('Content-Type', 'application/json');
     res.setHeader('Content-Disposition', `attachment; filename=traffic-export-${days}days.json`);
+    res.set('X-Traffic-Source', getApiSourceLabel());
+    res.set('X-Traffic-Last-Updated', new Date().toISOString());
     res.send(JSON.stringify(data, null, 2));
 }));
 

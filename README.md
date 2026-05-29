@@ -59,10 +59,14 @@ To enable 2GIS Routing API calls:
 ```env
 GIS_API_KEY=your_2gis_key
 USE_2GIS_API=true
+DEMO_SAFE_SYNTHETIC=false
 POLL_INTERVAL=300000
 ```
 
-The app caches route responses for 5 minutes and tracks daily usage against a 3000 request limit.
+The app caches route responses for 5 minutes and tracks daily usage against a 1000 request monthly limit (demo key).
+
+Full Russian setup guide: `backend/ZAPUSK.md`  
+Env security guide: `backend/SETUP_ENV_INSTRUCTIONS.md`
 
 ## Key API Endpoints
 
