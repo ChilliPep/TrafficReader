@@ -1,36 +1,38 @@
 const segments = [
     {
         segment_id: 'seg_kyzylorda_1',
-        name: 'Nursultana Nazarbayeva Ave',
+        name: 'Aiteke Bi Avenue',
         district: 'City Center',
         road_class: 'arterial',
         priority: 5,
-        length_km: 2.5,
+        length_km: 3.0,
         baseline_speed_kmh: 44,
-        latitude: 46.3168,
-        longitude: 65.2797,
+        latitude: 44.8530,
+        longitude: 65.5030,
         coordinates: [
-            [65.2639, 46.3199],
-            [65.2717, 46.3185],
-            [65.2797, 46.3168],
-            [65.2882, 46.3149]
+            [65.4850, 44.8545],
+            [65.4920, 44.8540],
+            [65.5000, 44.8533],
+            [65.5080, 44.8525],
+            [65.5160, 44.8518]
         ]
     },
     {
         segment_id: 'seg_kyzylorda_2',
-        name: 'Maylin Street',
-        district: 'North-East',
-        road_class: 'collector',
-        priority: 3,
-        length_km: 1.8,
-        baseline_speed_kmh: 38,
-        latitude: 46.3200,
-        longitude: 65.2850,
+        name: 'Korkyt Ata Street',
+        district: 'North Center',
+        road_class: 'arterial',
+        priority: 4,
+        length_km: 2.5,
+        baseline_speed_kmh: 42,
+        latitude: 44.8580,
+        longitude: 65.5050,
         coordinates: [
-            [65.2780, 46.3260],
-            [65.2816, 46.3232],
-            [65.2850, 46.3200],
-            [65.2886, 46.3168]
+            [65.4880, 44.8595],
+            [65.4950, 44.8590],
+            [65.5030, 44.8582],
+            [65.5110, 44.8575],
+            [65.5180, 44.8568]
         ]
     },
     {
@@ -41,100 +43,104 @@ const segments = [
         priority: 5,
         length_km: 3.2,
         baseline_speed_kmh: 46,
-        latitude: 46.3050,
-        longitude: 65.2800,
+        latitude: 44.8480,
+        longitude: 65.5020,
         coordinates: [
-            [65.2638, 46.3071],
-            [65.2722, 46.3061],
-            [65.2800, 46.3050],
-            [65.2910, 46.3033],
-            [65.2990, 46.3025]
+            [65.4830, 44.8495],
+            [65.4910, 44.8490],
+            [65.5000, 44.8483],
+            [65.5090, 44.8475],
+            [65.5170, 44.8468]
         ]
     },
     {
         segment_id: 'seg_kyzylorda_4',
-        name: 'Zhibek Zholy Street',
-        district: 'Central Market',
+        name: 'Zheltoksan Street',
+        district: 'West Center',
         road_class: 'collector',
         priority: 4,
-        length_km: 1.5,
-        baseline_speed_kmh: 34,
-        latitude: 46.3100,
-        longitude: 65.2900,
+        length_km: 1.8,
+        baseline_speed_kmh: 36,
+        latitude: 44.8530,
+        longitude: 65.4920,
         coordinates: [
-            [65.2842, 46.3151],
-            [65.2869, 46.3128],
-            [65.2900, 46.3100],
-            [65.2943, 46.3067]
+            [65.4910, 44.8610],
+            [65.4915, 44.8570],
+            [65.4920, 44.8530],
+            [65.4925, 44.8490],
+            [65.4930, 44.8450]
         ]
     },
     {
         segment_id: 'seg_kyzylorda_5',
-        name: 'Zheltoksan Street',
-        district: 'West Center',
+        name: 'Tokmagambetov Street',
+        district: 'East Center',
         road_class: 'collector',
         priority: 3,
-        length_km: 2.1,
-        baseline_speed_kmh: 36,
-        latitude: 46.3150,
-        longitude: 65.2750,
+        length_km: 1.6,
+        baseline_speed_kmh: 34,
+        latitude: 44.8530,
+        longitude: 65.5120,
         coordinates: [
-            [65.2680, 46.3230],
-            [65.2714, 46.3192],
-            [65.2750, 46.3150],
-            [65.2790, 46.3104]
+            [65.5110, 44.8610],
+            [65.5113, 44.8570],
+            [65.5118, 44.8530],
+            [65.5122, 44.8490],
+            [65.5125, 44.8450]
         ]
     },
     {
         segment_id: 'seg_kyzylorda_6',
-        name: 'Korkyt Ata Street',
+        name: 'Muratbayev Street',
         district: 'Railway Station',
-        road_class: 'arterial',
+        road_class: 'collector',
         priority: 4,
-        length_km: 2.7,
-        baseline_speed_kmh: 42,
-        latitude: 46.3237,
-        longitude: 65.2706,
+        length_km: 2.0,
+        baseline_speed_kmh: 38,
+        latitude: 44.8560,
+        longitude: 65.5010,
         coordinates: [
-            [65.2585, 46.3258],
-            [65.2660, 46.3245],
-            [65.2706, 46.3237],
-            [65.2790, 46.3225],
-            [65.2868, 46.3212]
+            [65.5000, 44.8630],
+            [65.5005, 44.8590],
+            [65.5010, 44.8550],
+            [65.5012, 44.8510],
+            [65.5015, 44.8470]
         ]
     },
     {
         segment_id: 'seg_kyzylorda_7',
-        name: 'Aiteke Bi Street',
-        district: 'Administrative Core',
+        name: 'Zhibek Zholy Street',
+        district: 'Central Market',
         road_class: 'collector',
-        priority: 4,
-        length_km: 1.9,
-        baseline_speed_kmh: 35,
-        latitude: 46.3126,
-        longitude: 65.2825,
+        priority: 5,
+        length_km: 1.5,
+        baseline_speed_kmh: 30,
+        latitude: 44.8510,
+        longitude: 65.5060,
         coordinates: [
-            [65.2764, 46.3183],
-            [65.2791, 46.3158],
-            [65.2825, 46.3126],
-            [65.2865, 46.3090]
+            [65.4960, 44.8515],
+            [65.5000, 44.8512],
+            [65.5050, 44.8508],
+            [65.5100, 44.8505],
+            [65.5140, 44.8502]
         ]
     },
     {
         segment_id: 'seg_kyzylorda_8',
-        name: 'Central Market Access',
-        district: 'Central Market',
+        name: 'Sultanbayev Street',
+        district: 'Administrative Core',
         road_class: 'local',
-        priority: 5,
+        priority: 3,
         length_km: 1.2,
-        baseline_speed_kmh: 26,
-        latitude: 46.3092,
-        longitude: 65.2865,
+        baseline_speed_kmh: 28,
+        latitude: 44.8560,
+        longitude: 65.5070,
         coordinates: [
-            [65.2814, 46.3112],
-            [65.2841, 46.3100],
-            [65.2865, 46.3092],
-            [65.2904, 46.3084]
+            [65.5060, 44.8610],
+            [65.5063, 44.8590],
+            [65.5067, 44.8560],
+            [65.5070, 44.8540],
+            [65.5073, 44.8520]
         ]
     },
     {
@@ -145,13 +151,14 @@ const segments = [
         priority: 3,
         length_km: 4.4,
         baseline_speed_kmh: 58,
-        latitude: 46.2974,
-        longitude: 65.3336,
+        latitude: 44.8460,
+        longitude: 65.5400,
         coordinates: [
-            [65.3000, 46.3024],
-            [65.3128, 46.3002],
-            [65.3256, 46.2984],
-            [65.3336, 46.2974]
+            [65.5200, 44.8490],
+            [65.5300, 44.8480],
+            [65.5400, 44.8465],
+            [65.5500, 44.8455],
+            [65.5600, 44.8445]
         ]
     }
 ];

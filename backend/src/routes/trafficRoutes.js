@@ -80,7 +80,7 @@ router.get('/snapshot', asyncRoute(async (req, res) => {
         city: {
             name: 'Kyzylorda',
             status: buildCityStatus(stats),
-            center: { lat: 46.3168, lon: 65.2797 }
+            center: { lat: 44.853, lon: 65.505 }
         },
         statistics: {
             avg_congestion: round(Number(stats.avg_congestion || 0)),
